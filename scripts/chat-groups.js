@@ -43,15 +43,24 @@ export const ChatGroups = {
         html.dataset.lqolTime = String(message.timestamp ?? 0);
     },
 
+    /**
+     * Surveille uniquement les listes de messages (barre latérale, notifications, chat détaché),
+     * pas toute la page : le chargement de la partie crée des milliers d'éléments ailleurs.
+     */
     listen() {
         const observer = new MutationObserver(mutations => {
-            const logs = new Set();
-            for (const mutation of mutations) {
-                if (mutation.target.classList?.contains("chat-log")) logs.add(mutation.target);
-            }
-            logs.forEach(regroup);
+            new Set(mutations.map(mutation => mutation.target)).forEach(regroup);
         });
-        observer.observe(document.body, { childList: true, subtree: true });
-        document.querySelectorAll(".chat-log").forEach(regroup);
+        const watched = new WeakSet();
+        const watchAll = () => {
+            for (const log of document.querySelectorAll(".chat-log")) {
+                if (watched.has(log)) continue;
+                watched.add(log);
+                observer.observe(log, { childList: true });
+                regroup(log);
+            }
+        };
+        Hooks.on("renderChatLog", watchAll);
+        Hooks.on("renderChatInput", watchAll);
     }
 };

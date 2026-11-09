@@ -108,9 +108,12 @@ export const FolderTextColor = {
         Hooks.on("updateFolder", folder => {
             Log.debug("Dossier : enregistré", folder.name, "— couleur du texte :", folder.getFlag(MODULE_ID, "textColor"));
         });
-        // Toutes les fenêtres qui affichent des dossiers : barre latérale, compendiums…
-        Hooks.on("renderApplicationV2", (_app, html) => {
+        // Seules fenêtres qui affichent des dossiers : listes de la barre latérale et contenu d'un compendium
+        // (DocumentDirectory, dont hérite Compendium), liste des compendiums (CompendiumDirectory)
+        const onRender = (_app, html) => {
             if (html instanceof HTMLElement) applyColors(html);
-        });
+        };
+        Hooks.on("renderDocumentDirectory", onRender);
+        Hooks.on("renderCompendiumDirectory", onRender);
     }
 };
