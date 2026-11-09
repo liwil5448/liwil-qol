@@ -61,6 +61,17 @@
     border-left: 4px solid var(--lqol-player-color, #3b3e48);
     border-radius: 0;
 }
+/* Joueurs déconnectés : gris clair, toujours lisible sur le noir, avec la mention « hors ligne » */
+.liwil-qol-whisper-menu button.liwil-qol-whisper-offline {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    color: #b8b5ae;
+}
+.liwil-qol-whisper-status {
+    flex: none;
+    font-size: 0.85em;
+}
 .liwil-qol-whisper button:hover {
     background: #30333d;
     color: #fff;

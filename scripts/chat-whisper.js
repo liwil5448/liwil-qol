@@ -53,12 +53,19 @@ function toggleMenu() {
     setMenuOpen(dropdown.querySelector(".liwil-qol-whisper-menu").hidden);
 }
 
-function createOption(label, name = "", color = null) {
+function createOption(label, name = "", color = null, offline = false) {
     const option = document.createElement("button");
     option.type = "button";
     option.textContent = label;
     option.dataset.name = name;
     if (color) option.style.setProperty("--lqol-player-color", color);
+    if (offline) {
+        option.classList.add("liwil-qol-whisper-offline");
+        const status = document.createElement("span");
+        status.classList.add("liwil-qol-whisper-status");
+        status.textContent = game.i18n.localize("LIWIL_QOL.ChatWhisper.Offline");
+        option.append(status);
+    }
     option.addEventListener("click", event => {
         Log.debug("Chuchotement : clic sur", name || "Personne", { shift: event.shiftKey, editeur: !!editorView });
         const recipients = getRecipients();
@@ -75,10 +82,12 @@ function createOption(label, name = "", color = null) {
 function refreshOptions() {
     const dropdown = getDropdown();
     if (!dropdown) return;
-    const users = game.users.filter(user => user.active && !user.isSelf).sort((a, b) => a.name.localeCompare(b.name));
+    // Joueurs connectés d'abord, puis les déconnectés (ils liront le chuchotement à leur connexion)
+    const users = game.users.filter(user => !user.isSelf)
+        .sort((a, b) => (b.active - a.active) || a.name.localeCompare(b.name));
     dropdown.querySelector(".liwil-qol-whisper-menu").replaceChildren(
         createOption(game.i18n.localize("LIWIL_QOL.ChatWhisper.None")),
-        ...users.map(user => createOption(user.name, user.name, user.color?.css))
+        ...users.map(user => createOption(user.name, user.name, user.color?.css, !user.active))
     );
     syncDropdown();
 }

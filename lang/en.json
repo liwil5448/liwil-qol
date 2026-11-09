@@ -24,7 +24,8 @@
     },
     "ChatWhisper": {
       "Label": "Whisper (Shift + click: several people)",
-      "None": "Nobody (public message)"
+      "None": "Nobody (public message)",
+      "Offline": "offline"
     },
     "JoinMusic": {
       "Play": "Unmute",
