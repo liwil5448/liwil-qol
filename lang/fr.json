@@ -23,7 +23,7 @@
       }
     },
     "ChatWhisper": {
-      "Label": "Chuchoter (Maj + clic : plusieurs personnes)",
+      "Label": "Mode chuchotement (dans la liste, Maj + clic : plusieurs personnes)",
       "None": "Personne (message public)",
       "Offline": "hors ligne"
     },

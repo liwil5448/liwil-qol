@@ -23,7 +23,7 @@
       }
     },
     "ChatWhisper": {
-      "Label": "Whisper (Shift + click: several people)",
+      "Label": "Whisper mode (in the list, Shift + click: several people)",
       "None": "Nobody (public message)",
       "Offline": "offline"
     },

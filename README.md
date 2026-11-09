@@ -17,7 +17,7 @@ Les réglages de portée « joueur » sont accessibles à chaque joueur pour lui
 
 **Couleur du texte des dossiers** (sans réglage) : la fenêtre de configuration d'un dossier propose un second sélecteur, sous la couleur du dossier, pour choisir la couleur de son nom. Vide : couleur d'origine.
 
-**Assistant de chuchotement** (sans réglage) : une bulle dans les modes de message ouvre la liste des joueurs : connectés d'abord, puis déconnectés (mention « hors ligne », ils liront le chuchotement à leur connexion). Clic : chuchoter à une personne. Maj + clic : plusieurs personnes. La commande `/w [A, B]` en tête du message reste la seule référence.
+**Assistant de chuchotement** (sans réglage) : la bulle dans les modes de message active ou désactive le mode chuchotement. Activée, elle affiche la barre des destinataires (liste fermée). Un clic sur la barre ouvre la liste des joueurs : connectés d'abord, puis déconnectés (mention « hors ligne », ils liront le chuchotement à leur connexion). Clic : chuchoter à une personne. Maj + clic : plusieurs personnes. Le mode reste actif après l'envoi, même avec « Personne » (message public), pour rechuchoter facilement. Désactiver la bulle retire la commande `/w` et cache la barre. La commande `/w [A, B]` en tête du message reste la seule référence.
 
 ## Cartes propres à un système
 

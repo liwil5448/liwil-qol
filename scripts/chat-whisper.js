@@ -1,6 +1,10 @@
 /**
- * Bouton de chuchotement dans les contrôles du chat : affiche une liste déroulante des utilisateurs connectés.
- * Clic : chuchoter à cette personne et refermer la liste. Maj + clic : ajouter ou retirer une personne, liste ouverte.
+ * Assistant de chuchotement dans les contrôles du chat.
+ * La bulle active ou désactive le mode chuchotement : la barre des destinataires apparaît, liste fermée.
+ * Un clic sur la barre ouvre la liste des joueurs. Clic sur un nom : chuchoter à cette personne et refermer
+ * la liste. Maj + clic : ajouter ou retirer une personne, liste ouverte.
+ * Le mode reste actif après l'envoi, même en message public (« Personne »), pour rechuchoter facilement.
+ * Désactiver la bulle retire la commande /w et cache la barre.
  * Liste sur mesure, car un <select> natif se referme à chaque choix.
  * Le début du message contient la commande /w, qui reste la seule référence des destinataires.
  */
@@ -11,6 +15,9 @@ const WHISPER_PREFIX = /^\/w(?:hisper)?\s+(\[[^\]]+]|\S+)\s*/i;
 
 /** Vue ProseMirror de la saisie du chat : modifier `value` n'a pas d'effet sur un éditeur actif */
 let editorView = null;
+
+/** Mode chuchotement : la barre des destinataires reste affichée, même en message public */
+let whisperMode = false;
 
 function getDropdown() {
     return document.querySelector(".liwil-qol-whisper");
@@ -34,8 +41,18 @@ function syncDropdown() {
         const name = option.dataset.name;
         option.ariaPressed = String(name ? recipients.includes(name) : !recipients.length);
     }
-    // En message public, rien ne reste affiché une fois la liste refermée
-    dropdown.hidden = menu.hidden && !recipients.length;
+    // Hors mode chuchotement, la barre n'apparaît que si une commande /w est tapée à la main
+    dropdown.hidden = !whisperMode && menu.hidden && !recipients.length;
+    const button = document.querySelector(".liwil-qol-whisper-button");
+    if (button) button.ariaPressed = String(whisperMode);
+}
+
+/** Bulle : active ou désactive le mode chuchotement, sans ouvrir la liste */
+function toggleWhisperMode() {
+    whisperMode = !whisperMode;
+    Log.debug("Chuchotement : mode", whisperMode ? "activé" : "désactivé");
+    if (!whisperMode && getRecipients().length) applyRecipients([]);
+    setMenuOpen(false);
 }
 
 function setMenuOpen(open) {
@@ -140,9 +157,10 @@ function addControls(chatControls, messageModes) {
     button.type = "button";
     button.classList.add("ui-control", "icon", "fa-solid", "fa-comment", "liwil-qol-whisper-button");
     button.ariaLabel = game.i18n.localize("LIWIL_QOL.ChatWhisper.Label");
+    button.ariaPressed = "false";
     button.dataset.tooltip = "";
     button.addEventListener("mousedown", event => event.preventDefault());
-    button.addEventListener("click", toggleMenu);
+    button.addEventListener("click", toggleWhisperMode);
     messageModes.append(button);
     Log.debug("Chuchotement : contrôles ajoutés au chat");
 }
