@@ -1,26 +1,41 @@
 /**
  * Musique de fond sur la page de connexion (/join).
  *
- * Foundry ne charge aucun script de module sur /join : seule la description du monde y est affichée,
- * insérée telle quelle. Le module y écrit donc un fragment caché, repérable par son id :
- *   <div id="liwil-qol-join-music" hidden><iframe srcdoc="<script>…</script>"></iframe></div>
- * Le script de l'iframe (même origine que la page) ajoute à la page un lecteur audio en boucle,
- * qui démarre dès que le navigateur l'autorise (au plus tard à la première interaction),
- * avec un bouton pour couper le son.
+ * Foundry ne charge aucun script de module sur /join : seule la description du monde y est affichée.
+ * À l'enregistrement, le serveur nettoie cette description : toute <iframe srcdoc> y est isolée
+ * (sandbox="allow-scripts allow-forms"), sans aucun accès à la page. Le lecteur vit donc entièrement
+ * dans l'iframe : musique, haut-parleur et curseur de volume. L'iframe est placée en bas à gauche
+ * de l'écran, sur fond transparent, par son attribut style (conservé par le nettoyage).
  *
- * Le fragment est réécrit par le MJ actif au chargement et à chaque changement de réglage.
- * Musique vide : le fragment est retiré de la description.
+ *   <div id="liwil-qol-join-music" data-lqol-sig="…"><iframe style="position:fixed;…" srcdoc="…"></iframe></div>
+ *
+ * Le fragment est réécrit par le MJ actif au chargement et à chaque changement de réglage, seulement
+ * si sa signature (data-lqol-sig) a changé. Musique vide : le fragment est retiré de la description.
  */
 import { MODULE_ID } from "./constants.js";
+import { Log } from "./log.js";
 
 const FRAGMENT_ID = "liwil-qol-join-music";
 const FRAGMENT_PATTERN = new RegExp(`\\s*<div id="${FRAGMENT_ID}"[\\s\\S]*?</div>`, "g");
 
-/** Code exécuté dans la page /join elle-même */
-function pageScript(config) {
-    if (window.liwilQolJoinMusic) return;
+/** Version du lecteur : la changer force la réécriture du fragment */
+const PLAYER_VERSION = 2;
 
-    // Préférences propres à ce navigateur : volume et son coupé. Volume du MJ par défaut.
+/** Taille de l'iframe : haut-parleur + curseur à sa droite */
+const FRAME_WIDTH = 320;
+const FRAME_HEIGHT = 60;
+
+/** Icônes SVG : l'iframe isolée n'a pas accès aux polices d'icônes de Foundry */
+const ICONS = {
+    on: '<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/>'
+        + '<path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    off: '<svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9H3z" fill="currentColor"/>'
+        + '<path d="M16 9l6 6M22 9l-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+};
+
+/** Code exécuté dans l'iframe : lecteur complet */
+function playerScript(config) {
+    // Préférences : l'iframe isolée n'a en général pas accès au stockage du navigateur, d'où les try/catch
     const STORAGE_KEY = "liwil-qol.joinMusic";
     let prefs = {};
     try { prefs = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch {}
@@ -32,45 +47,18 @@ function pageScript(config) {
     audio.loop = true;
     audio.preload = "auto";
     audio.volume = Number.isFinite(prefs.volume) ? prefs.volume : config.volume;
-    window.liwilQolJoinMusic = audio;
 
-    // Haut-parleur : un clic coupe ou rétablit le son ; le survol affiche le curseur de volume au-dessus
-    const control = document.createElement("div");
-    control.style.cssText = "position:fixed;left:16px;bottom:16px;z-index:1000;";
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.style.cssText = "display:flex;align-items:center;justify-content:center;width:48px;height:48px;padding:0;"
-        + "background:none;border:none;box-shadow:none;color:#e6e4df;font-size:32px;line-height:1;cursor:pointer;"
-        + "filter:drop-shadow(0 0 2px #000) drop-shadow(0 0 2px #000);outline-offset:2px;"
-        + "user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;";
-    const icon = document.createElement("i");
-    button.append(icon);
-
-    // Panneau du curseur, collé au-dessus du haut-parleur (sans espace, pour que le survol ne se perde pas)
-    const panel = document.createElement("div");
-    panel.hidden = true;
-    panel.style.cssText = "position:absolute;left:0;bottom:100%;padding-bottom:6px;";
-    const box = document.createElement("label");
-    box.style.cssText = "display:flex;align-items:center;gap:10px;width:220px;padding:10px 12px;"
-        + "background:#000;color:#e6e4df;border:2px solid #e6e4df;border-radius:8px;font-size:16px;";
-    const slider = document.createElement("input");
-    slider.type = "range";
-    slider.min = "0";
-    slider.max = "100";
-    slider.step = "5";
+    const control = document.getElementById("control");
+    const button = document.getElementById("speaker");
+    const panel = document.getElementById("panel");
+    const slider = document.getElementById("slider");
+    const percent = document.getElementById("percent");
     slider.ariaLabel = config.labels.volume;
-    slider.style.cssText = "flex:1;margin:0;accent-color:#e6e4df;cursor:pointer;";
-    const percent = document.createElement("span");
-    percent.style.cssText = "min-width:3.5em;text-align:right;";
-    box.append(slider, percent);
-    panel.append(box);
-    control.append(panel, button);
 
     const isOff = () => audio.paused || audio.muted || audio.volume === 0;
     const refresh = () => {
         const off = isOff();
-        icon.className = `fa-solid ${off ? "fa-volume-xmark" : "fa-volume-high"}`;
+        button.innerHTML = off ? config.icons.off : config.icons.on;
         button.ariaLabel = off ? config.labels.play : config.labels.mute;
         button.ariaPressed = String(!off);
         const value = Math.round(audio.volume * 100);
@@ -82,7 +70,6 @@ function pageScript(config) {
     audio.addEventListener("volumechange", refresh);
 
     const turnOn = () => {
-        stopWaiting();
         if (audio.volume === 0) audio.volume = config.volume || 0.5;
         audio.muted = false;
         audio.play().catch(() => {});
@@ -98,7 +85,6 @@ function pageScript(config) {
             return;
         }
         if (isOff()) return turnOn();
-        stopWaiting();
         audio.muted = true;
         prefs.muted = true;
         savePrefs();
@@ -112,8 +98,7 @@ function pageScript(config) {
     });
 
     // Curseur visible au survol de la souris, pendant qu'on le fait glisser, au clavier (Tab),
-    // ou après un appui long sur écran tactile (il reste alors affiché jusqu'à un toucher ailleurs)
-    const LONG_PRESS_DELAY = 500;
+    // ou après un appui long sur écran tactile (il reste alors affiché jusqu'à un nouvel appui sur le haut-parleur)
     let hovered = false;
     let dragging = false;
     let pinned = false;
@@ -122,13 +107,6 @@ function pageScript(config) {
         const keyboard = button.matches(":focus-visible") || slider.matches(":focus-visible");
         panel.hidden = !(hovered || dragging || keyboard || pinned);
     };
-    const closePanel = () => {
-        hovered = pinned = false;
-        button.blur();
-        slider.blur();
-        updatePanel();
-    };
-    // Au toucher, pointerenter et pointerleave accompagnent chaque appui : le survol ne vaut que pour la souris
     control.addEventListener("pointerenter", event => {
         if (event.pointerType === "touch") return;
         hovered = true;
@@ -139,23 +117,42 @@ function pageScript(config) {
         hovered = false;
         updatePanel();
     });
+    // Quand la souris quitte l'iframe directement vers la page, l'iframe isolée ne reçoit pas toujours
+    // d'événement de sortie : sans mouvement de souris pendant quelques secondes, le survol prend fin
+    let idleTimer = null;
+    control.addEventListener("pointermove", event => {
+        if (event.pointerType === "touch") return;
+        hovered = true;
+        updatePanel();
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => {
+            hovered = false;
+            updatePanel();
+        }, 4000);
+    });
+    document.addEventListener("mouseout", event => {
+        if (event.relatedTarget) return;
+        hovered = false;
+        updatePanel();
+    });
     const cancelPress = () => {
         clearTimeout(pressTimer);
         pressTimer = null;
     };
     button.addEventListener("pointerdown", event => {
+        const wasPinned = pinned;
         longPressed = false;
         cancelPress();
         if (event.pointerType === "mouse") return;
         pressTimer = setTimeout(() => {
             pressTimer = null;
-            longPressed = pinned = true;
+            longPressed = true;
+            pinned = !wasPinned;
             updatePanel();
-        }, LONG_PRESS_DELAY);
+        }, 500);
     });
     button.addEventListener("pointerup", cancelPress);
     button.addEventListener("pointercancel", cancelPress);
-    // Empêche le menu contextuel que l'appui long ouvre sur mobile
     button.addEventListener("contextmenu", event => event.preventDefault());
     slider.addEventListener("pointerdown", () => { dragging = true; });
     document.addEventListener("pointerup", () => {
@@ -163,46 +160,44 @@ function pageScript(config) {
         dragging = false;
         updatePanel();
     });
-    document.addEventListener("pointerdown", event => {
-        if (pinned && !control.contains(event.target)) closePanel();
-    });
     control.addEventListener("focusin", () => setTimeout(updatePanel));
     control.addEventListener("focusout", () => setTimeout(updatePanel));
     document.addEventListener("keydown", event => {
-        if (event.key === "Escape" && !panel.hidden) closePanel();
+        if (event.key !== "Escape" || panel.hidden) return;
+        hovered = pinned = false;
+        button.blur();
+        slider.blur();
+        updatePanel();
     });
     refresh();
-    document.body.append(control);
 
-    // Son coupé par ce joueur la dernière fois : on attend qu'il relance la musique lui-même
-    const events = ["pointerdown", "keydown", "touchstart"];
-    function stopWaiting() {
-        for (const type of events) document.removeEventListener(type, tryPlay, true);
-    }
-    function tryPlay(event) {
-        // Un clic sur le haut-parleur ou le curseur est traité par eux
-        if (event && control.contains(event.target)) return;
-        audio.play().then(stopWaiting, () => {});
-    }
-    if (prefs.muted) return;
-
-    // Démarrage immédiat ; si le navigateur le bloque, nouvel essai à la première interaction
-    for (const type of events) document.addEventListener(type, tryPlay, true);
-    tryPlay();
+    // Démarrage immédiat (autorisé par l'application Foundry). Dans un navigateur qui le bloque,
+    // le haut-parleur reste barré : un clic dessus lance la musique.
+    if (!prefs.muted) audio.play().catch(() => {});
 }
 
-/** Code de l'iframe : injecte pageScript dans la page /join, et seulement là */
-function frameScript(code) {
-    try {
-        const page = window.parent;
-        if (page === window || !/\/join\/?$/.test(page.location.pathname) || page.liwilQolJoinMusic) return;
-        const script = page.document.createElement("script");
-        script.textContent = code;
-        page.document.head.append(script);
-    }
-    catch {
-        // iframe isolée (sandbox) : pas d'accès à la page
-    }
+/** Page HTML de l'iframe */
+function frameDocument(config) {
+    const color = "#e6e4df";
+    const style = `
+        :root { color-scheme: normal; }
+        html, body { margin: 0; height: 100%; background: transparent; overflow: hidden; }
+        body { display: flex; align-items: center; padding-left: 4px; font: 16px sans-serif; color: ${color}; }
+        #control { display: flex; align-items: center; gap: 6px; }
+        #speaker { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; padding: 0;
+            background: none; border: none; color: ${color}; cursor: pointer; outline-offset: 2px;
+            filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 2px #000);
+            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation; }
+        #panel { display: flex; align-items: center; gap: 10px; width: 230px; padding: 8px 10px;
+            background: #000; border: 2px solid ${color}; border-radius: 8px; box-sizing: border-box; }
+        #panel[hidden] { display: none; }
+        #slider { flex: 1; margin: 0; accent-color: ${color}; cursor: pointer; }
+        #percent { flex: none; min-width: 3.6em; text-align: right; white-space: nowrap; }`;
+    const script = `(${playerScript})(${toScriptJSON(config)});`;
+    return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>${style}</style></head><body>`
+        + `<div id="control"><button type="button" id="speaker"></button>`
+        + `<label id="panel" hidden><input type="range" id="slider" min="0" max="100" step="5"><span id="percent"></span></label></div>`
+        + `<script>${script}</script></body></html>`;
 }
 
 /** JSON sûr à placer dans un <script> */
@@ -214,20 +209,30 @@ function escapeAttribute(text) {
     return text.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+/** Petite empreinte (djb2) pour savoir si le fragment enregistré est à jour */
+function signature(text) {
+    let hash = 5381;
+    for (let i = 0; i < text.length; i++) hash = ((hash << 5) + hash + text.charCodeAt(i)) >>> 0;
+    return hash.toString(36);
+}
+
 function buildFragment(src, volume) {
     const config = {
         src,
         volume,
+        icons: ICONS,
         labels: {
             play: game.i18n.localize("LIWIL_QOL.JoinMusic.Play"),
             mute: game.i18n.localize("LIWIL_QOL.JoinMusic.Mute"),
             volume: game.i18n.localize("LIWIL_QOL.JoinMusic.Volume")
         }
     };
-    const pageCode = `(${pageScript})(${toScriptJSON(config)});`;
-    const frameCode = `(${frameScript})(${toScriptJSON(pageCode)});`;
-    const srcdoc = `<script>${frameCode}</script>`;
-    return `<div id="${FRAGMENT_ID}" hidden><iframe title="music" srcdoc="${escapeAttribute(srcdoc)}"></iframe></div>`;
+    const srcdoc = frameDocument(config);
+    const frameStyle = `position:fixed;left:12px;bottom:12px;z-index:1000;width:${FRAME_WIDTH}px;height:${FRAME_HEIGHT}px;`
+        + "border:0;background:transparent;color-scheme:normal;";
+    const sig = signature(`${PLAYER_VERSION}|${srcdoc}`);
+    return `<div id="${FRAGMENT_ID}" data-lqol-sig="${sig}"><iframe title="${escapeAttribute(config.labels.volume)}" `
+        + `style="${frameStyle}" srcdoc="${escapeAttribute(srcdoc)}"></iframe></div>`;
 }
 
 let syncing = Promise.resolve();
@@ -237,10 +242,20 @@ async function writeDescription() {
     const src = game.settings.get(MODULE_ID, "joinMusic")?.trim() ?? "";
     const volume = Math.clamp(Number(game.settings.get(MODULE_ID, "joinMusicVolume")) || 0, 0, 1);
     const current = game.world.description ?? "";
-    const base = current.replace(FRAGMENT_PATTERN, "").trimEnd();
-    const next = src ? [base, buildFragment(src, volume)].filter(Boolean).join("\n") : base;
-    if (next === current) return;
+    const fragment = src ? buildFragment(src, volume) : "";
 
+    // Le serveur réécrit le fragment en le nettoyant : on compare la signature, pas le texte
+    const saved = current.match(FRAGMENT_PATTERN)?.[0] ?? "";
+    const savedSig = saved.match(/data-lqol-sig="([^"]*)"/)?.[1] ?? null;
+    const wantedSig = fragment.match(/data-lqol-sig="([^"]*)"/)?.[1] ?? null;
+    const count = current.match(FRAGMENT_PATTERN)?.length ?? 0;
+    if (savedSig === wantedSig && count <= 1) {
+        Log.debug("Musique de connexion : description déjà à jour");
+        return;
+    }
+
+    const base = current.replace(FRAGMENT_PATTERN, "").trimEnd();
+    const next = [base, fragment].filter(Boolean).join("\n");
     let response;
     try {
         response = await foundry.utils.fetchJsonWithTimeout(foundry.utils.getRoute("setup"), {
@@ -251,15 +266,15 @@ async function writeDescription() {
         if (response.error) throw new Error(response.error);
     }
     catch (error) {
-        console.error(`${MODULE_ID} | Écriture de la musique de connexion impossible`, error);
+        Log.error("Écriture de la musique de connexion impossible", error);
         ui.notifications.error("LIWIL_QOL.JoinMusic.Error", { localize: true });
         return;
     }
     game.world.updateSource({ description: response.description });
+    Log.debug("Musique de connexion : description mise à jour", src || "(retirée)");
 
-    // Un nettoyage côté serveur isolerait l'iframe (sandbox) et empêcherait la musique
-    const saved = (response.description ?? "").match(FRAGMENT_PATTERN)?.[0] ?? "";
-    if (src && (!/<iframe[^>]*srcdoc/.test(saved) || /sandbox=/.test(saved))) {
+    const stored = (response.description ?? "").match(FRAGMENT_PATTERN)?.[0] ?? "";
+    if (src && !/<iframe[^>]*srcdoc/.test(stored)) {
         ui.notifications.warn("LIWIL_QOL.JoinMusic.Blocked", { localize: true });
     }
 }

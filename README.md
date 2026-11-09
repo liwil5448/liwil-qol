@@ -25,11 +25,13 @@ Le CSS générique (`styles/chat-dark.css`) ne touche qu'aux classes de Foundry.
 
 ## Musique de la page de connexion : fonctionnement
 
-Foundry ne charge aucun script de module sur `/join`. La seule chose de la partie affichée sur cette page est la **description du monde**. Le module y écrit donc un fragment caché (`<div id="liwil-qol-join-music">`) qui lance la musique.
+Foundry ne charge aucun script de module sur `/join`. La seule chose de la partie affichée sur cette page est la **description du monde**, et le serveur la nettoie à l'enregistrement : une `<iframe>` y est toujours isolée (`sandbox`), sans accès à la page. Le module y écrit donc un lecteur complet, enfermé dans une iframe placée en bas à gauche de l'écran sur fond transparent (`<div id="liwil-qol-join-music">`).
 
-- Le MJ actif réécrit ce fragment au chargement et à chaque changement de réglage. S'il disparaît (par exemple après une modification de la description), il revient au prochain chargement du MJ.
-- La musique démarre dès l'ouverture de la page. Si le navigateur bloque le son tant que la page n'a reçu aucun clic ni aucune touche, elle démarre à la première interaction, par exemple au choix du joueur.
-- Un haut-parleur en bas à gauche de la page, barré quand le son est coupé : un clic coupe ou rétablit le son, et le survol (ou la touche Tab, ou un appui long sur écran tactile) affiche le curseur de volume. Ces choix sont propres à chaque navigateur et sont mémorisés. Un joueur qui a coupé le son ne l'entendra plus au retour, jusqu'à ce qu'il le rétablisse.
+- Le MJ actif réécrit ce fragment au chargement et à chaque changement de réglage, seulement s'il a changé (signature `data-lqol-sig`). S'il disparaît (par exemple après une modification de la description), il revient au prochain chargement du MJ.
+- **Application Foundry** (Windows, macOS, Linux) : la musique démarre dès l'ouverture de la page.
+- **Navigateur** : les navigateurs bloquent le son tant qu'on n'a pas cliqué. Le haut-parleur reste barré : un clic dessus lance la musique. Un clic ailleurs sur la page ne suffit pas, car l'iframe isolée ne le voit pas.
+- Un clic sur le haut-parleur coupe ou rétablit le son. Le survol (ou la touche Tab, ou un appui long sur écran tactile) affiche le curseur de volume à sa droite. Il se referme quand la souris s'en va, ou au plus tard après 4 secondes sans mouvement.
+- L'iframe isolée n'a pas accès au stockage du navigateur : volume et son coupé ne sont pas mémorisés d'une visite à l'autre. Chaque visite repart du volume choisi par le MJ.
 - **Avant de désactiver le module, videz le réglage** : le fragment est retiré de la description. Sinon, la musique continue de jouer.
 - Sans effet avec le thème de connexion « minimal », qui n'affiche pas la description.
 

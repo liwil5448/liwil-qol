@@ -11,7 +11,7 @@
       },
       "JoinMusic": {
         "Name": "Join page music",
-        "Hint": "Music looped on the players' join page. The module writes it into the world description: clear this field before disabling the module. No effect with the \"minimal\" join theme."
+        "Hint": "Music looped on the players' join page. It starts by itself in the Foundry app; in a web browser, click the speaker at the bottom left. The module writes it into the world description: clear this field before disabling the module. No effect with the \"minimal\" join theme."
       },
       "JoinMusicVolume": {
         "Name": "Join page music volume",
@@ -31,7 +31,7 @@
       "Mute": "Mute",
       "Volume": "Music volume",
       "Error": "Liwil QoL: could not save the join page music into the world description.",
-      "Blocked": "Liwil QoL: Foundry sandboxed the join page player, the music will not be able to play."
+      "Blocked": "Liwil QoL: the music player was stripped from the world description when saving, the music will not be able to play."
     },
     "FolderTextColor": {
       "Name": "Text color",

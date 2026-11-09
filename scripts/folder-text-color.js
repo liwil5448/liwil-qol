@@ -64,8 +64,31 @@ function applyColors(html) {
         const color = getTextColor(getFolder(header.parentElement));
         if (color) Log.debug("Dossier : couleur du texte appliquée", color, header);
         header.classList.toggle("lqol-folder-text", !!color);
+        // Style en ligne : ne dépend d'aucune feuille de style et passe devant les règles des systèmes et modules
+        const targets = [header, ...header.querySelectorAll(":scope > i, :scope > .folder-name")];
+        for (const element of targets) {
+            if (color) {
+                element.style.setProperty("color", color);
+                element.style.setProperty("text-shadow", "none");
+            }
+            else {
+                element.style.removeProperty("color");
+                element.style.removeProperty("text-shadow");
+            }
+        }
         if (color) header.style.setProperty("--lqol-folder-text", color);
         else header.style.removeProperty("--lqol-folder-text");
+        // Boutons « + » : le cœur fixe --button-text-color sur chaque bouton
+        for (const button of header.querySelectorAll(".create-button")) {
+            if (color) {
+                button.style.setProperty("--button-text-color", color);
+                button.style.setProperty("color", color);
+            }
+            else {
+                button.style.removeProperty("--button-text-color");
+                button.style.removeProperty("color");
+            }
+        }
     }
 }
 
