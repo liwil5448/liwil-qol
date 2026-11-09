@@ -28,12 +28,14 @@ function addPicker(app, html) {
     label.textContent = game.i18n.localize("LIWIL_QOL.FolderTextColor.Name");
     const fields = document.createElement("div");
     fields.classList.add("form-fields");
-    const picker = document.createElement("color-picker");
+    // create() : <color-picker> ne lit sa valeur initiale que dans son constructeur,
+    // un attribut « value » posé après coup serait ignoré (et la couleur effacée au prochain enregistrement)
+    const picker = foundry.applications.elements.HTMLColorPickerElement.create({
+        name: `flags.${MODULE_ID}.textColor`,
+        value: getTextColor(app.document) ?? "",
+        placeholder: "#ffffff"
+    });
     picker.id = id;
-    picker.setAttribute("name", `flags.${MODULE_ID}.textColor`);
-    picker.setAttribute("placeholder", "#ffffff");
-    const color = getTextColor(app.document);
-    if (color) picker.setAttribute("value", color);
     fields.append(picker);
     const hint = document.createElement("p");
     hint.classList.add("hint");
