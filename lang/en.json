@@ -15,7 +15,7 @@
       },
       "JoinMusicVolume": {
         "Name": "Join page music volume",
-        "Hint": "Starting volume of the music on the join page."
+        "Hint": "Starting volume of the music on the join page. Each player can then adjust it for themselves with the round button at the bottom left of the page."
       }
     },
     "ChatWhisper": {
@@ -25,6 +25,7 @@
     "JoinMusic": {
       "Play": "Play music",
       "Mute": "Mute music",
+      "Volume": "Music volume",
       "Error": "Liwil QoL: could not save the join page music into the world description.",
       "Blocked": "Liwil QoL: Foundry sandboxed the join page player, the music will not be able to play."
     }

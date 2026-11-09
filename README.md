@@ -22,6 +22,7 @@ Le CSS générique (`styles/chat-dark.css`) ne touche qu'aux classes de Foundry.
 Foundry ne charge aucun script de module sur `/join`. La seule chose de la partie affichée sur cette page est la **description du monde**. Le module y écrit donc un fragment caché (`<div id="liwil-qol-join-music">`) qui lance la musique.
 
 - Le MJ actif réécrit ce fragment au chargement et à chaque changement de réglage. S'il disparaît (par exemple après une modification de la description), il revient au prochain chargement du MJ.
-- Les navigateurs bloquent souvent le son tant que la page n'a reçu aucun clic ni aucune touche. La musique démarre alors à la première interaction, par exemple au choix du joueur.
+- La musique démarre dès l'ouverture de la page. Si le navigateur bloque le son tant que la page n'a reçu aucun clic ni aucune touche, elle démarre à la première interaction, par exemple au choix du joueur.
+- Le bouton rond en bas à gauche ouvre un panneau : lancer ou couper la musique, et régler son volume. Ces choix sont propres à chaque navigateur et sont mémorisés. Un joueur qui a coupé le son ne l'entendra plus au retour, jusqu'à ce qu'il la relance.
 - **Avant de désactiver le module, videz le réglage** : le fragment est retiré de la description. Sinon, la musique continue de jouer.
 - Sans effet avec le thème de connexion « minimal », qui n'affiche pas la description.

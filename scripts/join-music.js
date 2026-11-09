@@ -19,46 +19,126 @@ const FRAGMENT_PATTERN = new RegExp(`\\s*<div id="${FRAGMENT_ID}"[\\s\\S]*?</div
 /** Code exécuté dans la page /join elle-même */
 function pageScript(config) {
     if (window.liwilQolJoinMusic) return;
+
+    // Préférences propres à ce navigateur : volume et son coupé. Volume du MJ par défaut.
+    const STORAGE_KEY = "liwil-qol.joinMusic";
+    let prefs = {};
+    try { prefs = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch {}
+    const savePrefs = () => {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs)); } catch {}
+    };
+
     const audio = new Audio(config.src);
     audio.loop = true;
     audio.preload = "auto";
-    audio.volume = config.volume;
+    audio.volume = Number.isFinite(prefs.volume) ? prefs.volume : config.volume;
     window.liwilQolJoinMusic = audio;
 
-    // Bouton pour couper ou remettre le son
+    const colors = "background:#000;color:#e6e4df;border:2px solid #e6e4df;";
+
+    // Bouton rond : ouvre le panneau du son
     const button = document.createElement("button");
     button.type = "button";
-    button.style.cssText = "position:fixed;left:16px;bottom:16px;z-index:1000;width:44px;height:44px;"
+    button.ariaExpanded = "false";
+    button.ariaLabel = button.title = config.labels.volume;
+    button.style.cssText = "position:fixed;left:16px;bottom:16px;z-index:1000;width:44px;height:44px;padding:0;"
         + "display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;"
-        + "background:#000;color:#e6e4df;border:2px solid #e6e4df;border-radius:50%;cursor:pointer;";
+        + `${colors}border-radius:50%;cursor:pointer;`;
     const icon = document.createElement("i");
     button.append(icon);
+
+    // Panneau : lancer ou couper la musique, curseur de volume
+    const panel = document.createElement("div");
+    panel.hidden = true;
+    panel.style.cssText = "position:fixed;left:16px;bottom:68px;z-index:1000;width:220px;padding:10px;"
+        + `display:flex;flex-direction:column;gap:10px;${colors}border-radius:8px;font-size:16px;`;
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.style.cssText = `display:flex;align-items:center;gap:8px;padding:6px 10px;${colors}border-radius:4px;`
+        + "cursor:pointer;font-size:16px;";
+    const toggleIcon = document.createElement("i");
+    const toggleText = document.createElement("span");
+    toggle.append(toggleIcon, toggleText);
+    const sliderLabel = document.createElement("label");
+    sliderLabel.style.cssText = "display:flex;align-items:center;gap:8px;";
+    const slider = document.createElement("input");
+    slider.type = "range";
+    slider.min = "0";
+    slider.max = "100";
+    slider.step = "5";
+    slider.ariaLabel = config.labels.volume;
+    slider.style.cssText = "flex:1;accent-color:#e6e4df;";
+    const percent = document.createElement("span");
+    percent.style.cssText = "min-width:3.5em;text-align:right;";
+    sliderLabel.append(slider, percent);
+    panel.append(toggle, sliderLabel);
+
+    const isOff = () => audio.paused || audio.muted || audio.volume === 0;
     const refresh = () => {
-        const off = audio.paused || audio.muted;
+        const off = isOff();
         icon.className = `fa-solid ${off ? "fa-volume-xmark" : "fa-volume-high"}`;
-        button.ariaLabel = button.title = off ? config.labels.play : config.labels.mute;
+        const playing = !audio.paused && !audio.muted;
+        toggleIcon.className = `fa-solid ${playing ? "fa-volume-xmark" : "fa-play"}`;
+        toggleText.textContent = playing ? config.labels.mute : config.labels.play;
+        const value = Math.round(audio.volume * 100);
+        slider.value = String(value);
+        percent.textContent = `${value} %`;
     };
     audio.addEventListener("play", refresh);
     audio.addEventListener("pause", refresh);
     audio.addEventListener("volumechange", refresh);
+
+    const setOpen = open => {
+        panel.hidden = !open;
+        button.ariaExpanded = String(open);
+    };
     button.addEventListener("click", event => {
         event.stopPropagation();
-        if (audio.paused) {
+        setOpen(panel.hidden);
+    });
+    toggle.addEventListener("click", () => {
+        stopWaiting();
+        if (audio.paused || audio.muted) {
             audio.muted = false;
             audio.play().catch(() => {});
+            prefs.muted = false;
         }
-        else audio.muted = !audio.muted;
-        stopWaiting();
+        else {
+            audio.muted = true;
+            prefs.muted = true;
+        }
+        savePrefs();
+    });
+    slider.addEventListener("input", () => {
+        audio.volume = Number(slider.value) / 100;
+        prefs.volume = audio.volume;
+        savePrefs();
+    });
+    document.addEventListener("pointerdown", event => {
+        if (!panel.hidden && !panel.contains(event.target) && !button.contains(event.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", event => {
+        if (event.key === "Escape" && !panel.hidden) {
+            setOpen(false);
+            button.focus();
+        }
     });
     refresh();
-    document.body.append(button);
+    document.body.append(panel, button);
 
-    // Le navigateur bloque souvent la lecture tant que l'utilisateur n'a pas interagi avec la page
+    // Son coupé par ce joueur la dernière fois : on attend qu'il relance la musique lui-même
     const events = ["pointerdown", "keydown", "touchstart"];
-    const tryPlay = () => audio.play().then(stopWaiting, () => {});
     function stopWaiting() {
         for (const type of events) document.removeEventListener(type, tryPlay, true);
     }
+    function tryPlay(event) {
+        // Un clic dans le panneau du son est traité par le panneau
+        if (event && (panel.contains(event.target) || button.contains(event.target))) return;
+        audio.play().then(stopWaiting, () => {});
+    }
+    if (prefs.muted) return;
+
+    // Démarrage immédiat ; si le navigateur le bloque, nouvel essai à la première interaction
     for (const type of events) document.addEventListener(type, tryPlay, true);
     tryPlay();
 }
@@ -92,7 +172,8 @@ function buildFragment(src, volume) {
         volume,
         labels: {
             play: game.i18n.localize("LIWIL_QOL.JoinMusic.Play"),
-            mute: game.i18n.localize("LIWIL_QOL.JoinMusic.Mute")
+            mute: game.i18n.localize("LIWIL_QOL.JoinMusic.Mute"),
+            volume: game.i18n.localize("LIWIL_QOL.JoinMusic.Volume")
         }
     };
     const pageCode = `(${pageScript})(${toScriptJSON(config)});`;
