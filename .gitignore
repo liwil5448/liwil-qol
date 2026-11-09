@@ -1,0 +1,10 @@
+# Archives (spécifications, paquets de version)
+*.zip
+
+# Système et éditeurs
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+node_modules/

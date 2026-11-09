@@ -1,0 +1,98 @@
+/* ============================================================
+   Liwil QoL — chat sombre, cartes propres à PTR (ptu) et Liwil Mon
+   Chargé par main.js seulement avec ces systèmes (voir SYSTEM_STYLES).
+   Les variables --lqol-chat-* sont définies dans styles/chat-dark.css.
+   ============================================================ */
+
+/* ---------- Barres de titre (flavor) ---------- */
+body.liwil-qol-chat-dark .chat-message.message .flavor-text {
+    background-color: var(--lqol-chat-header);
+    color: var(--lqol-chat-text);
+}
+body.liwil-qol-chat-dark .chat-message.message .flavor-text .header-bar .action,
+body.liwil-qol-chat-dark .chat-message.message .flavor-text h3,
+body.liwil-qol-chat-dark .chat-message.message .flavor-text h4 {
+    color: var(--lqol-chat-text) !important;
+}
+body.liwil-qol-chat-dark .chat-message.message .flavor-text .header-bar.title-bar .roll-type {
+    background: var(--lqol-chat-bg-alt);
+    color: var(--lqol-chat-text) !important;
+}
+body.liwil-qol-chat-dark .chat-message.message .flavor-text .header-bar.title-bar .roll-type.attack-roll {
+    background: linear-gradient(45deg, #2f3768, #3c4a8a);
+}
+body.liwil-qol-chat-dark .chat-message.message .flavor-text .header-bar.title-bar .roll-type.damage-roll {
+    background: linear-gradient(45deg, #5e262c, #7a3238);
+}
+body.liwil-qol-chat-dark .chat-message.message .flavor-text .header-bar.tags .tag.tag-transparent {
+    color: var(--lqol-chat-text);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25);
+}
+
+/* Pied de carte (footer) */
+body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer {
+    color: var(--lqol-chat-text);
+}
+body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .effect {
+    background: var(--lqol-chat-bg-alt);
+    border-color: var(--lqol-chat-border);
+    color: var(--lqol-chat-text);
+}
+
+/* ---------- Corps des jets ---------- */
+body.liwil-qol-chat-dark .chat-message.message .attack-roll,
+body.liwil-qol-chat-dark .chat-message.message .attack-selector,
+body.liwil-qol-chat-dark .chat-message.message .damage-content {
+    background: var(--lqol-chat-bg);
+    color: var(--lqol-chat-text);
+}
+body.liwil-qol-chat-dark .chat-message.message .attack-roll .img-row,
+body.liwil-qol-chat-dark .chat-message.message .attack-selector .img-row {
+    background: rgba(255, 255, 255, .04);
+    border-color: var(--lqol-chat-border);
+    box-shadow: none;
+}
+
+/* ---------- Boutons propres aux cartes ---------- */
+body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .buttons .apply-capture,
+body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .buttons .contested-check,
+body.liwil-qol-chat-dark .chat-message.message .message-buttons button {
+    background: var(--lqol-chat-button);
+    color: var(--lqol-chat-text);
+    border: 1px solid var(--lqol-chat-border);
+}
+body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .buttons .apply-capture:hover,
+body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .buttons .contested-check:hover,
+body.liwil-qol-chat-dark .chat-message.message .message-buttons button:hover {
+    background: var(--lqol-chat-button-hover);
+    color: #fff;
+    border-color: #fff;
+    box-shadow: 0 0 0 1px #fff;
+}
+
+/* ---------- Liste des cibles (dégâts) ---------- */
+body.liwil-qol-chat-dark .chat-message.message .mon-list .mon-list-header {
+    border-bottom-color: var(--lqol-chat-border);
+}
+body.liwil-qol-chat-dark .chat-message.message .mon-list .mon-list-header h4 {
+    color: var(--lqol-chat-text);
+}
+body.liwil-qol-chat-dark .chat-message.message .mon-list .mon-list-item {
+    background: rgba(255, 255, 255, .05);
+}
+body.liwil-qol-chat-dark .chat-message.message .mon-list .hit-crit .hit,
+body.liwil-qol-chat-dark .chat-message.message .mon-list .hit-crit .crit,
+body.liwil-qol-chat-dark .chat-message.message .mon-list .applicators .full {
+    color: var(--lqol-chat-good);
+}
+body.liwil-qol-chat-dark .chat-message.message .mon-list .applicators .half,
+body.liwil-qol-chat-dark .chat-message.message .mon-list .applicators .resist {
+    color: var(--lqol-chat-warn);
+}
+body.liwil-qol-chat-dark .chat-message.message .mon-list .hit-crit .fa-times-circle,
+body.liwil-qol-chat-dark .chat-message.message .mon-list .applicators .weak {
+    color: var(--lqol-chat-bad);
+}
+body.liwil-qol-chat-dark .chat-message.message .mon-list .applicators .flat {
+    color: var(--lqol-chat-info);
+}

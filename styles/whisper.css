@@ -1,0 +1,89 @@
+/* ============================================================
+   Liwil QoL — liste déroulante de chuchotement (chat-whisper.js)
+   Indépendante du chat sombre : style sombre et fixe.
+   ============================================================ */
+
+.chat-sidebar #chat-controls {
+    flex-wrap: wrap;
+}
+.liwil-qol-whisper {
+    position: relative;
+    pointer-events: all; /* #ui-right ne capte pas les clics par défaut */
+}
+.chat-sidebar #chat-controls .liwil-qol-whisper {
+    flex: 0 0 100%;
+    margin-top: 4px;
+}
+.liwil-qol-whisper button {
+    width: 100%;
+    height: auto;
+    min-height: 28px;
+    padding: 3px 8px;
+    background: #000;
+    color: #e6e4df;
+    text-align: left;
+}
+.liwil-qol-whisper .liwil-qol-whisper-toggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid #6b6f7b;
+}
+.liwil-qol-whisper-current {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* S'ouvre vers le haut, au-dessus du chat : la saisie reste visible */
+.liwil-qol-whisper-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 240px;
+    margin-bottom: 2px;
+    padding: 2px;
+    overflow-y: auto;
+    background: #000;
+    border: 1px solid #6b6f7b;
+}
+.liwil-qol-whisper-menu[hidden] {
+    display: none;
+}
+.liwil-qol-whisper-menu button {
+    flex: none;
+    border: none;
+    border-left: 4px solid var(--lqol-player-color, #3b3e48);
+    border-radius: 0;
+}
+.liwil-qol-whisper button:hover {
+    background: #30333d;
+    color: #fff;
+}
+.liwil-qol-whisper-menu button[aria-pressed="true"],
+.liwil-qol-whisper-menu button[aria-pressed="true"]:hover {
+    background: #e6e4df;
+    color: #000;
+}
+/* Barre latérale repliée : colonne étroite à droite de la saisie, seule la flèche reste visible */
+#chat-notifications #chat-controls .liwil-qol-whisper {
+    margin-top: 4px;
+}
+#chat-notifications .liwil-qol-whisper-current {
+    display: none;
+}
+#chat-notifications .liwil-qol-whisper .liwil-qol-whisper-toggle {
+    justify-content: center;
+    padding: 3px 0;
+}
+#chat-notifications .liwil-qol-whisper-menu {
+    left: auto;
+    right: calc(100% + 4px);
+    bottom: calc(var(--chat-input-height) + 8px);
+    width: 200px;
+}

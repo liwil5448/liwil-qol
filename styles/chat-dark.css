@@ -1,0 +1,94 @@
+/* ============================================================
+   Liwil QoL — chat sombre (partie générique, valable pour tout système)
+   Actif quand <body> porte la classe .liwil-qol-chat-dark
+   (réglage « Chat sombre »). Les cartes propres à un système
+   sont habillées dans styles/systems/<système>.css.
+   Pour retoucher les couleurs : modifier les variables ci-dessous.
+   ============================================================ */
+
+body.liwil-qol-chat-dark {
+    --lqol-chat-bg: #000000;          /* fond du chat et des cartes */
+    --lqol-chat-bg-alt: #1f2026;      /* blocs internes (formule, total, effet, citations) */
+    --lqol-chat-header: #000000;      /* barres de titre */
+    --lqol-chat-whisper: #0038F5;     /* fond des chuchotements */
+    --lqol-chat-border: #3b3e48;
+    --lqol-chat-text: #e6e4df;
+    --lqol-chat-text-muted: #c9c6bf;
+    --lqol-chat-button: #30333d;
+    --lqol-chat-button-hover: #3d414d;
+    --lqol-chat-good: #7ccf6b;
+    --lqol-chat-warn: #e6b54a;
+    --lqol-chat-bad: #ff6b6b;
+    --lqol-chat-info: #74a9ff;
+}
+
+/* ---------- Fond du chat, entre les messages ---------- */
+body.liwil-qol-chat-dark .chat-sidebar,
+body.liwil-qol-chat-dark .chat-sidebar .chat-scroll,
+body.liwil-qol-chat-dark .chat-sidebar .chat-log {
+    background: var(--lqol-chat-bg);
+}
+
+/* ---------- Conteneur du message ---------- */
+body.liwil-qol-chat-dark .chat-message {
+    background: var(--lqol-chat-bg);
+    border-color: var(--lqol-player-color, var(--lqol-chat-border)); /* couleur du joueur (main.js) */
+    color: var(--lqol-chat-text);
+}
+body.liwil-qol-chat-dark .chat-message.whisper {
+    background: var(--lqol-chat-whisper);
+    box-shadow: inset 0 0 5px #000;
+}
+body.liwil-qol-chat-dark .chat-message.whisper .message-header,
+body.liwil-qol-chat-dark .chat-message.whisper .message-header h4,
+body.liwil-qol-chat-dark .chat-message.whisper .message-header .message-metadata,
+body.liwil-qol-chat-dark .chat-message.whisper .message-content {
+    color: #fff;
+}
+body.liwil-qol-chat-dark .chat-message .message-header,
+body.liwil-qol-chat-dark .chat-message .message-header h4,
+body.liwil-qol-chat-dark .chat-message .message-header .message-metadata {
+    color: var(--lqol-chat-text-muted);
+}
+body.liwil-qol-chat-dark .chat-message .message-content {
+    color: var(--lqol-chat-text);
+}
+
+/* ---------- Jets de dés ---------- */
+body.liwil-qol-chat-dark .chat-message .dice-roll .dice-formula,
+body.liwil-qol-chat-dark .chat-message .dice-roll .dice-total {
+    background: var(--lqol-chat-bg-alt);
+    border-color: var(--lqol-chat-border);
+    color: var(--lqol-chat-text);
+}
+body.liwil-qol-chat-dark .chat-message .dice-tooltip,
+body.liwil-qol-chat-dark .chat-message .dice-tooltip .dice,
+body.liwil-qol-chat-dark .chat-message .dice-tooltip .part-header {
+    background: var(--lqol-chat-bg-alt);
+    color: var(--lqol-chat-text);
+    border-color: var(--lqol-chat-border);
+}
+
+/* ---------- Boutons ---------- */
+body.liwil-qol-chat-dark .chat-message button {
+    background: var(--lqol-chat-button);
+    color: var(--lqol-chat-text);
+    border: 1px solid var(--lqol-chat-border);
+}
+body.liwil-qol-chat-dark .chat-message button:hover {
+    background: var(--lqol-chat-button-hover);
+    color: #fff;
+    border-color: #fff;
+    box-shadow: 0 0 0 1px #fff; /* cadre de 2px au total, sans décaler le bouton */
+}
+
+/* ---------- Citations ---------- */
+body.liwil-qol-chat-dark .chat-message blockquote {
+    margin: 0.35rem 0;
+    padding: 0.25rem 0.5rem;
+    background: var(--lqol-chat-bg-alt);
+    border: none;
+    border-left: 4px solid var(--lqol-chat-text);
+    color: #f0eee9;
+    font-style: normal;
+}

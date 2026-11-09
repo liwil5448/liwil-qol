@@ -1,0 +1,32 @@
+{
+  "LIWIL_QOL": {
+    "Settings": {
+      "SidebarExpanded": {
+        "Name": "Barre latérale ouverte au démarrage",
+        "Hint": "Garde la barre latérale de droite ouverte au chargement de la partie. Si décoché, elle démarre repliée."
+      },
+      "DarkChat": {
+        "Name": "Chat sombre",
+        "Hint": "Affiche le chat avec un thème sombre très contrasté : fond noir, cadre à la couleur du joueur, chuchotements en bleu. Décoché : style d'origine."
+      },
+      "JoinMusic": {
+        "Name": "Musique de la page de connexion",
+        "Hint": "Musique jouée en boucle sur la page de connexion des joueurs. Le module l'inscrit dans la description du monde : videz ce champ avant de désactiver le module. Sans effet avec le thème de connexion « minimal »."
+      },
+      "JoinMusicVolume": {
+        "Name": "Volume de la musique de connexion",
+        "Hint": "Volume de départ de la musique sur la page de connexion."
+      }
+    },
+    "ChatWhisper": {
+      "Label": "Chuchoter (Maj + clic : plusieurs personnes)",
+      "None": "Personne (message public)"
+    },
+    "JoinMusic": {
+      "Play": "Lancer la musique",
+      "Mute": "Couper la musique",
+      "Error": "Liwil QoL : impossible d'enregistrer la musique de connexion dans la description du monde.",
+      "Blocked": "Liwil QoL : Foundry a isolé le lecteur de la page de connexion, la musique ne pourra pas jouer."
+    }
+  }
+}
