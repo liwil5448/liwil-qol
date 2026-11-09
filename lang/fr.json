@@ -16,6 +16,10 @@
       "JoinMusicVolume": {
         "Name": "Volume de la musique de connexion",
         "Hint": "Volume de départ de la musique sur la page de connexion. Chaque joueur peut ensuite le régler pour lui-même avec le haut-parleur en bas à gauche de la page."
+      },
+      "Debug": {
+        "Name": "Journal de débogage",
+        "Hint": "Affiche dans la console (F12) le détail de ce que fait le module. Filtrer la console sur liwil-qol pour ne voir que lui. Propre à ce navigateur."
       }
     },
     "ChatWhisper": {

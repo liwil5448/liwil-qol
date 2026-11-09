@@ -16,6 +16,10 @@
       "JoinMusicVolume": {
         "Name": "Join page music volume",
         "Hint": "Starting volume of the music on the join page. Each player can then adjust it for themselves with the speaker at the bottom left of the page."
+      },
+      "Debug": {
+        "Name": "Debug log",
+        "Hint": "Show in the console (F12) what the module is doing. Filter the console on liwil-qol to see only it. Specific to this browser."
       }
     },
     "ChatWhisper": {

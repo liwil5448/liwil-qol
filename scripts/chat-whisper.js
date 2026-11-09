@@ -4,6 +4,7 @@
  * Liste sur mesure, car un <select> natif se referme à chaque choix.
  * Le début du message contient la commande /w, qui reste la seule référence des destinataires.
  */
+import { Log } from "./log.js";
 
 /** Commande de chuchotement en début de message (même syntaxe que ChatLog) */
 const WHISPER_PREFIX = /^\/w(?:hisper)?\s+(\[[^\]]+]|\S+)\s*/i;
@@ -59,6 +60,7 @@ function createOption(label, name = "", color = null) {
     option.dataset.name = name;
     if (color) option.style.setProperty("--lqol-player-color", color);
     option.addEventListener("click", event => {
+        Log.debug("Chuchotement : clic sur", name || "Personne", { shift: event.shiftKey, editeur: !!editorView });
         const recipients = getRecipients();
         if (name && event.shiftKey) {
             applyRecipients(recipients.includes(name) ? recipients.filter(r => r !== name) : [...recipients, name]);
@@ -83,7 +85,10 @@ function refreshOptions() {
 
 /** Remplace la commande en début de message, sans toucher au texte déjà saisi */
 function applyRecipients(names) {
-    if (!editorView) return;
+    if (!editorView) {
+        Log.warn("Chuchotement : éditeur du chat introuvable, la commande /w n'a pas pu être insérée.");
+        return;
+    }
     const { state } = editorView;
     const match = state.doc.firstChild?.textContent.match(WHISPER_PREFIX);
     const start = 1; // Début du premier paragraphe
@@ -118,36 +123,47 @@ function addControls(chatControls, messageModes) {
 
     dropdown.append(toggle, menu);
     chatControls.append(dropdown);
+    // Garder le focus dans la saisie : sa perte change la hauteur de la saisie (barre repliée)
+    // et peut déplacer la liste entre l'appui et le relâchement du clic
+    dropdown.addEventListener("mousedown", event => event.preventDefault());
 
     const button = document.createElement("button");
     button.type = "button";
     button.classList.add("ui-control", "icon", "fa-solid", "fa-comment", "liwil-qol-whisper-button");
     button.ariaLabel = game.i18n.localize("LIWIL_QOL.ChatWhisper.Label");
     button.dataset.tooltip = "";
+    button.addEventListener("mousedown", event => event.preventDefault());
     button.addEventListener("click", toggleMenu);
     messageModes.append(button);
+    Log.debug("Chuchotement : contrôles ajoutés au chat");
 }
 
 export const ChatWhisper = {
     listen() {
+        // Phase de capture : passe avant les écouteurs des autres modules, qui pourraient arrêter l'événement
         document.addEventListener("plugins", event => {
             if (!event.target.closest?.("#chat-message")) return;
             event.plugins.liwilQolWhisper = new foundry.prosemirror.state.Plugin({
                 view(view) {
                     editorView = view;
+                    Log.debug("Chuchotement : éditeur du chat trouvé");
                     return {
                         update: syncDropdown,
                         destroy() {
                             if (editorView === view) editorView = null;
+                            Log.debug("Chuchotement : éditeur du chat fermé");
                         }
                     };
                 }
             });
-        });
+        }, true);
 
         // Un clic en dehors de la liste la referme
         document.addEventListener("pointerdown", event => {
-            if (!event.target.closest?.(".liwil-qol-whisper, .liwil-qol-whisper-button")) setMenuOpen(false);
+            if (event.target.closest?.(".liwil-qol-whisper, .liwil-qol-whisper-button")) return;
+            const menu = getDropdown()?.querySelector(".liwil-qol-whisper-menu");
+            if (menu && !menu.hidden) Log.debug("Chuchotement : liste fermée par un clic en dehors, sur", event.target);
+            setMenuOpen(false);
         });
 
         Hooks.on("renderChatInput", (_app, elements) => addControls(elements["#chat-controls"], elements["#message-modes"]));

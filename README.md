@@ -13,7 +13,7 @@ Module Foundry VTT (V14) de confort de jeu, indépendant du système.
 
 Les réglages de portée « joueur » sont accessibles à chaque joueur pour lui-même. Ceux de portée « monde » ne sont visibles que des utilisateurs qui ont le droit de modifier la configuration : par défaut, le MJ et le MJ assistant.
 
-**Cadre du chat sombre** : les messages qui se suivent d'un même joueur forment un groupe, entouré d'un cadre épais (10 px) à sa couleur, avec un liseré fin (2 px) entre les messages. Épaisseurs et couleurs sont des variables en tête de `styles/chat-dark.css`.
+**Cadre du chat sombre** : les messages qui se suivent d'un même joueur, envoyés par le même locuteur (même token, même acteur, ou le joueur lui-même sans token) et à moins de 10 minutes d'intervalle, forment un groupe, entouré d'un cadre épais (10 px) à sa couleur, avec un liseré fin (2 px) entre les messages. Épaisseurs et couleurs sont des variables en tête de `styles/chat-dark.css`.
 
 **Couleur du texte des dossiers** (sans réglage) : la fenêtre de configuration d'un dossier propose un second sélecteur, sous la couleur du dossier, pour choisir la couleur de son nom. Vide : couleur d'origine.
 
@@ -32,3 +32,7 @@ Foundry ne charge aucun script de module sur `/join`. La seule chose de la parti
 - Un haut-parleur en bas à gauche de la page, barré quand le son est coupé : un clic coupe ou rétablit le son, et le survol (ou la touche Tab, ou un appui long sur écran tactile) affiche le curseur de volume. Ces choix sont propres à chaque navigateur et sont mémorisés. Un joueur qui a coupé le son ne l'entendra plus au retour, jusqu'à ce qu'il le rétablisse.
 - **Avant de désactiver le module, videz le réglage** : le fragment est retiré de la description. Sinon, la musique continue de jouer.
 - Sans effet avec le thème de connexion « minimal », qui n'affiche pas la description.
+
+## Dépannage
+
+Le réglage **Journal de débogage** (propre à chaque navigateur) affiche dans la console (F12) le détail de ce que fait le module. Tous ses messages commencent par `liwil-qol |` : tapez `liwil-qol` dans le filtre de la console pour ne voir qu'eux. Les avertissements et les erreurs du module y apparaissent même sans ce réglage.

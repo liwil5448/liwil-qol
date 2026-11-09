@@ -7,6 +7,7 @@ import { ChatWhisper } from "./chat-whisper.js";
 import { JoinMusic } from "./join-music.js";
 import { ChatGroups } from "./chat-groups.js";
 import { FolderTextColor } from "./folder-text-color.js";
+import { Log } from "./log.js";
 
 /** Fichiers CSS propres aux cartes de chat de certains systèmes (styles/systems/<fichier>.css) */
 const SYSTEM_STYLES = {
@@ -51,6 +52,7 @@ function registerSettings() {
     });
 
     JoinMusic.registerSettings();
+    Log.registerSetting();
 }
 
 // Doit exister avant la création de l'éditeur ProseMirror du chat

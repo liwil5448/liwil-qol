@@ -6,6 +6,7 @@
  * Champ vide : texte d'origine de Foundry.
  */
 import { MODULE_ID } from "./constants.js";
+import { Log } from "./log.js";
 
 const COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
 
@@ -43,6 +44,7 @@ function addPicker(app, html) {
     group.append(label, fields, hint);
     colorGroup.after(group);
     app.setPosition?.({ height: "auto" });
+    Log.debug("Dossier : sélecteur ajouté pour", app.document?.name, "— couleur actuelle :", getTextColor(app.document));
 }
 
 /** Dossier affiché par un élément de liste (dossier du monde ou d'un compendium) */
@@ -60,6 +62,7 @@ function getFolder(item) {
 function applyColors(html) {
     for (const header of html.querySelectorAll("li.folder > .folder-header")) {
         const color = getTextColor(getFolder(header.parentElement));
+        if (color) Log.debug("Dossier : couleur du texte appliquée", color, header);
         header.classList.toggle("lqol-folder-text", !!color);
         if (color) header.style.setProperty("--lqol-folder-text", color);
         else header.style.removeProperty("--lqol-folder-text");
@@ -68,7 +71,20 @@ function applyColors(html) {
 
 export const FolderTextColor = {
     listen() {
-        Hooks.on("renderFolderConfig", (app, html) => addPicker(app, html));
+        Hooks.on("renderFolderConfig", (app, html) => {
+            try {
+                addPicker(app, html);
+            }
+            catch (error) {
+                Log.error("Dossier : impossible d'ajouter le sélecteur de couleur du texte", error);
+            }
+        });
+        Hooks.on("preUpdateFolder", (folder, changes) => {
+            Log.debug("Dossier : enregistrement demandé pour", folder.name, foundry.utils.deepClone(changes));
+        });
+        Hooks.on("updateFolder", folder => {
+            Log.debug("Dossier : enregistré", folder.name, "— couleur du texte :", folder.getFlag(MODULE_ID, "textColor"));
+        });
         // Toutes les fenêtres qui affichent des dossiers : barre latérale, compendiums…
         Hooks.on("renderApplicationV2", (_app, html) => {
             if (html instanceof HTMLElement) applyColors(html);
