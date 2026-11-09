@@ -34,52 +34,44 @@ function pageScript(config) {
     audio.volume = Number.isFinite(prefs.volume) ? prefs.volume : config.volume;
     window.liwilQolJoinMusic = audio;
 
-    const colors = "background:#000;color:#e6e4df;border:2px solid #e6e4df;";
+    // Haut-parleur : un clic coupe ou rétablit le son ; le survol affiche le curseur de volume au-dessus
+    const control = document.createElement("div");
+    control.style.cssText = "position:fixed;left:16px;bottom:16px;z-index:1000;";
 
-    // Bouton rond : ouvre le panneau du son
     const button = document.createElement("button");
     button.type = "button";
-    button.ariaExpanded = "false";
-    button.ariaLabel = button.title = config.labels.volume;
-    button.style.cssText = "position:fixed;left:16px;bottom:16px;z-index:1000;width:44px;height:44px;padding:0;"
-        + "display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;"
-        + `${colors}border-radius:50%;cursor:pointer;`;
+    button.style.cssText = "display:flex;align-items:center;justify-content:center;width:48px;height:48px;padding:0;"
+        + "background:none;border:none;box-shadow:none;color:#e6e4df;font-size:32px;line-height:1;cursor:pointer;"
+        + "filter:drop-shadow(0 0 2px #000) drop-shadow(0 0 2px #000);outline-offset:2px;";
     const icon = document.createElement("i");
     button.append(icon);
 
-    // Panneau : lancer ou couper la musique, curseur de volume
+    // Panneau du curseur, collé au-dessus du haut-parleur (sans espace, pour que le survol ne se perde pas)
     const panel = document.createElement("div");
     panel.hidden = true;
-    panel.style.cssText = "position:fixed;left:16px;bottom:68px;z-index:1000;width:220px;padding:10px;"
-        + `display:flex;flex-direction:column;gap:10px;${colors}border-radius:8px;font-size:16px;`;
-    const toggle = document.createElement("button");
-    toggle.type = "button";
-    toggle.style.cssText = `display:flex;align-items:center;gap:8px;padding:6px 10px;${colors}border-radius:4px;`
-        + "cursor:pointer;font-size:16px;";
-    const toggleIcon = document.createElement("i");
-    const toggleText = document.createElement("span");
-    toggle.append(toggleIcon, toggleText);
-    const sliderLabel = document.createElement("label");
-    sliderLabel.style.cssText = "display:flex;align-items:center;gap:8px;";
+    panel.style.cssText = "position:absolute;left:0;bottom:100%;padding-bottom:6px;";
+    const box = document.createElement("label");
+    box.style.cssText = "display:flex;align-items:center;gap:10px;width:220px;padding:10px 12px;"
+        + "background:#000;color:#e6e4df;border:2px solid #e6e4df;border-radius:8px;font-size:16px;";
     const slider = document.createElement("input");
     slider.type = "range";
     slider.min = "0";
     slider.max = "100";
     slider.step = "5";
     slider.ariaLabel = config.labels.volume;
-    slider.style.cssText = "flex:1;accent-color:#e6e4df;";
+    slider.style.cssText = "flex:1;margin:0;accent-color:#e6e4df;cursor:pointer;";
     const percent = document.createElement("span");
     percent.style.cssText = "min-width:3.5em;text-align:right;";
-    sliderLabel.append(slider, percent);
-    panel.append(toggle, sliderLabel);
+    box.append(slider, percent);
+    panel.append(box);
+    control.append(panel, button);
 
     const isOff = () => audio.paused || audio.muted || audio.volume === 0;
     const refresh = () => {
         const off = isOff();
         icon.className = `fa-solid ${off ? "fa-volume-xmark" : "fa-volume-high"}`;
-        const playing = !audio.paused && !audio.muted;
-        toggleIcon.className = `fa-solid ${playing ? "fa-volume-xmark" : "fa-play"}`;
-        toggleText.textContent = playing ? config.labels.mute : config.labels.play;
+        button.ariaLabel = off ? config.labels.play : config.labels.mute;
+        button.ariaPressed = String(!off);
         const value = Math.round(audio.volume * 100);
         slider.value = String(value);
         percent.textContent = `${value} %`;
@@ -88,43 +80,56 @@ function pageScript(config) {
     audio.addEventListener("pause", refresh);
     audio.addEventListener("volumechange", refresh);
 
-    const setOpen = open => {
-        panel.hidden = !open;
-        button.ariaExpanded = String(open);
-    };
-    button.addEventListener("click", event => {
-        event.stopPropagation();
-        setOpen(panel.hidden);
-    });
-    toggle.addEventListener("click", () => {
+    const turnOn = () => {
         stopWaiting();
-        if (audio.paused || audio.muted) {
-            audio.muted = false;
-            audio.play().catch(() => {});
-            prefs.muted = false;
-        }
-        else {
-            audio.muted = true;
-            prefs.muted = true;
-        }
+        if (audio.volume === 0) audio.volume = config.volume || 0.5;
+        audio.muted = false;
+        audio.play().catch(() => {});
+        prefs.muted = false;
+        prefs.volume = audio.volume;
+        savePrefs();
+    };
+    button.addEventListener("click", () => {
+        if (isOff()) return turnOn();
+        stopWaiting();
+        audio.muted = true;
+        prefs.muted = true;
         savePrefs();
     });
     slider.addEventListener("input", () => {
         audio.volume = Number(slider.value) / 100;
         prefs.volume = audio.volume;
         savePrefs();
+        // Monter le volume alors que le son est coupé le rétablit
+        if (audio.volume > 0 && (audio.paused || audio.muted)) turnOn();
     });
-    document.addEventListener("pointerdown", event => {
-        if (!panel.hidden && !panel.contains(event.target) && !button.contains(event.target)) setOpen(false);
+
+    // Curseur visible au survol, pendant qu'on le fait glisser, ou au clavier (Tab)
+    let hovered = false;
+    let dragging = false;
+    const updatePanel = () => {
+        const keyboard = button.matches(":focus-visible") || slider.matches(":focus-visible");
+        panel.hidden = !(hovered || dragging || keyboard);
+    };
+    control.addEventListener("pointerenter", () => { hovered = true; updatePanel(); });
+    control.addEventListener("pointerleave", () => { hovered = false; updatePanel(); });
+    slider.addEventListener("pointerdown", () => { dragging = true; });
+    document.addEventListener("pointerup", () => {
+        if (!dragging) return;
+        dragging = false;
+        updatePanel();
     });
+    control.addEventListener("focusin", () => setTimeout(updatePanel));
+    control.addEventListener("focusout", () => setTimeout(updatePanel));
     document.addEventListener("keydown", event => {
-        if (event.key === "Escape" && !panel.hidden) {
-            setOpen(false);
-            button.focus();
-        }
+        if (event.key !== "Escape" || panel.hidden) return;
+        hovered = false;
+        button.blur();
+        slider.blur();
+        updatePanel();
     });
     refresh();
-    document.body.append(panel, button);
+    document.body.append(control);
 
     // Son coupé par ce joueur la dernière fois : on attend qu'il relance la musique lui-même
     const events = ["pointerdown", "keydown", "touchstart"];
@@ -132,8 +137,8 @@ function pageScript(config) {
         for (const type of events) document.removeEventListener(type, tryPlay, true);
     }
     function tryPlay(event) {
-        // Un clic dans le panneau du son est traité par le panneau
-        if (event && (panel.contains(event.target) || button.contains(event.target))) return;
+        // Un clic sur le haut-parleur ou le curseur est traité par eux
+        if (event && control.contains(event.target)) return;
         audio.play().then(stopWaiting, () => {});
     }
     if (prefs.muted) return;

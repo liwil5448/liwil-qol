@@ -15,7 +15,7 @@
       },
       "JoinMusicVolume": {
         "Name": "Volume de la musique de connexion",
-        "Hint": "Volume de départ de la musique sur la page de connexion. Chaque joueur peut ensuite le régler pour lui-même avec le bouton rond en bas à gauche de la page."
+        "Hint": "Volume de départ de la musique sur la page de connexion. Chaque joueur peut ensuite le régler pour lui-même avec le haut-parleur en bas à gauche de la page."
       }
     },
     "ChatWhisper": {
@@ -23,8 +23,8 @@
       "None": "Personne (message public)"
     },
     "JoinMusic": {
-      "Play": "Lancer la musique",
-      "Mute": "Couper la musique",
+      "Play": "Activer le son",
+      "Mute": "Couper le son",
       "Volume": "Volume de la musique",
       "Error": "Liwil QoL : impossible d'enregistrer la musique de connexion dans la description du monde.",
       "Blocked": "Liwil QoL : Foundry a isolé le lecteur de la page de connexion, la musique ne pourra pas jouer."
