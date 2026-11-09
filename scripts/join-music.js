@@ -42,7 +42,8 @@ function pageScript(config) {
     button.type = "button";
     button.style.cssText = "display:flex;align-items:center;justify-content:center;width:48px;height:48px;padding:0;"
         + "background:none;border:none;box-shadow:none;color:#e6e4df;font-size:32px;line-height:1;cursor:pointer;"
-        + "filter:drop-shadow(0 0 2px #000) drop-shadow(0 0 2px #000);outline-offset:2px;";
+        + "filter:drop-shadow(0 0 2px #000) drop-shadow(0 0 2px #000);outline-offset:2px;"
+        + "user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation;";
     const icon = document.createElement("i");
     button.append(icon);
 
@@ -89,7 +90,13 @@ function pageScript(config) {
         prefs.volume = audio.volume;
         savePrefs();
     };
+    let longPressed = false;
     button.addEventListener("click", () => {
+        // Le relâchement d'un appui long ne doit pas couper ou rétablir le son
+        if (longPressed) {
+            longPressed = false;
+            return;
+        }
         if (isOff()) return turnOn();
         stopWaiting();
         audio.muted = true;
@@ -104,29 +111,65 @@ function pageScript(config) {
         if (audio.volume > 0 && (audio.paused || audio.muted)) turnOn();
     });
 
-    // Curseur visible au survol, pendant qu'on le fait glisser, ou au clavier (Tab)
+    // Curseur visible au survol de la souris, pendant qu'on le fait glisser, au clavier (Tab),
+    // ou après un appui long sur écran tactile (il reste alors affiché jusqu'à un toucher ailleurs)
+    const LONG_PRESS_DELAY = 500;
     let hovered = false;
     let dragging = false;
+    let pinned = false;
+    let pressTimer = null;
     const updatePanel = () => {
         const keyboard = button.matches(":focus-visible") || slider.matches(":focus-visible");
-        panel.hidden = !(hovered || dragging || keyboard);
+        panel.hidden = !(hovered || dragging || keyboard || pinned);
     };
-    control.addEventListener("pointerenter", () => { hovered = true; updatePanel(); });
-    control.addEventListener("pointerleave", () => { hovered = false; updatePanel(); });
+    const closePanel = () => {
+        hovered = pinned = false;
+        button.blur();
+        slider.blur();
+        updatePanel();
+    };
+    // Au toucher, pointerenter et pointerleave accompagnent chaque appui : le survol ne vaut que pour la souris
+    control.addEventListener("pointerenter", event => {
+        if (event.pointerType === "touch") return;
+        hovered = true;
+        updatePanel();
+    });
+    control.addEventListener("pointerleave", event => {
+        if (event.pointerType === "touch") return;
+        hovered = false;
+        updatePanel();
+    });
+    const cancelPress = () => {
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    };
+    button.addEventListener("pointerdown", event => {
+        longPressed = false;
+        cancelPress();
+        if (event.pointerType === "mouse") return;
+        pressTimer = setTimeout(() => {
+            pressTimer = null;
+            longPressed = pinned = true;
+            updatePanel();
+        }, LONG_PRESS_DELAY);
+    });
+    button.addEventListener("pointerup", cancelPress);
+    button.addEventListener("pointercancel", cancelPress);
+    // Empêche le menu contextuel que l'appui long ouvre sur mobile
+    button.addEventListener("contextmenu", event => event.preventDefault());
     slider.addEventListener("pointerdown", () => { dragging = true; });
     document.addEventListener("pointerup", () => {
         if (!dragging) return;
         dragging = false;
         updatePanel();
     });
+    document.addEventListener("pointerdown", event => {
+        if (pinned && !control.contains(event.target)) closePanel();
+    });
     control.addEventListener("focusin", () => setTimeout(updatePanel));
     control.addEventListener("focusout", () => setTimeout(updatePanel));
     document.addEventListener("keydown", event => {
-        if (event.key !== "Escape" || panel.hidden) return;
-        hovered = false;
-        button.blur();
-        slider.blur();
-        updatePanel();
+        if (event.key === "Escape" && !panel.hidden) closePanel();
     });
     refresh();
     document.body.append(control);
