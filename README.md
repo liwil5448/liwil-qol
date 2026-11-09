@@ -7,9 +7,15 @@ Module Foundry VTT (V14) de confort de jeu, indépendant du système.
 | Réglage | Portée | Effet |
 |---|---|---|
 | Barre latérale ouverte au démarrage | joueur | Ouvre ou replie la barre latérale de droite au chargement de la partie. |
-| Chat sombre | joueur | Thème sombre très contrasté : fond noir, cadre à la couleur du joueur, chuchotements en bleu `#0038F5`, pas d'italique. |
+| Chat sombre | joueur | Désactivé par défaut. Blanc sur fond noir : cadre à la couleur du joueur, chuchotements en bleu `#0038F5`, pas d'italique, fonds décoratifs du système retirés. |
 | Musique de la page de connexion | monde (MJ) | Musique en boucle sur la page `/join`, avec un haut-parleur pour couper le son et régler le volume. |
 | Volume de la musique de connexion | monde (MJ) | Volume de départ de cette musique. |
+
+Les réglages de portée « joueur » sont accessibles à chaque joueur pour lui-même. Ceux de portée « monde » ne sont visibles que des utilisateurs qui ont le droit de modifier la configuration : par défaut, le MJ et le MJ assistant.
+
+**Cadre du chat sombre** : les messages qui se suivent d'un même joueur forment un groupe, entouré d'un cadre épais (10 px) à sa couleur, avec un liseré fin (2 px) entre les messages. Épaisseurs et couleurs sont des variables en tête de `styles/chat-dark.css`.
+
+**Couleur du texte des dossiers** (sans réglage) : la fenêtre de configuration d'un dossier propose un second sélecteur, sous la couleur du dossier, pour choisir la couleur de son nom. Vide : couleur d'origine.
 
 **Assistant de chuchotement** (sans réglage) : une bulle dans les modes de message ouvre la liste des joueurs connectés. Clic : chuchoter à une personne. Maj + clic : plusieurs personnes. La commande `/w [A, B]` en tête du message reste la seule référence.
 

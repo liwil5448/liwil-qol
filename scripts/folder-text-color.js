@@ -1,0 +1,75 @@
+/**
+ * Couleur du texte des dossiers.
+ * La fenêtre de configuration d'un dossier reçoit un second sélecteur, sous la couleur du dossier.
+ * La couleur est enregistrée dans le flag `textColor` du dossier, puis appliquée à l'en-tête
+ * du dossier dans toutes les listes (barre latérale, compendiums).
+ * Champ vide : texte d'origine de Foundry.
+ */
+import { MODULE_ID } from "./constants.js";
+
+const COLOR_PATTERN = /^#[0-9a-f]{6}$/i;
+
+function getTextColor(folder) {
+    const color = folder?.getFlag?.(MODULE_ID, "textColor");
+    return COLOR_PATTERN.test(color ?? "") ? color : null;
+}
+
+/** Ajoute le sélecteur sous celui de la couleur du dossier */
+function addPicker(app, html) {
+    if (html.querySelector(`[name="flags.${MODULE_ID}.textColor"]`)) return;
+    const colorGroup = html.querySelector('[name="color"]')?.closest(".form-group");
+    if (!colorGroup) return;
+
+    const id = `${app.id}-lqol-text-color`;
+    const group = document.createElement("div");
+    group.classList.add("form-group");
+    const label = document.createElement("label");
+    label.htmlFor = id;
+    label.textContent = game.i18n.localize("LIWIL_QOL.FolderTextColor.Name");
+    const fields = document.createElement("div");
+    fields.classList.add("form-fields");
+    const picker = document.createElement("color-picker");
+    picker.id = id;
+    picker.setAttribute("name", `flags.${MODULE_ID}.textColor`);
+    picker.setAttribute("placeholder", "#ffffff");
+    const color = getTextColor(app.document);
+    if (color) picker.setAttribute("value", color);
+    fields.append(picker);
+    const hint = document.createElement("p");
+    hint.classList.add("hint");
+    hint.textContent = game.i18n.localize("LIWIL_QOL.FolderTextColor.Hint");
+    group.append(label, fields, hint);
+    colorGroup.after(group);
+    app.setPosition?.({ height: "auto" });
+}
+
+/** Dossier affiché par un élément de liste (dossier du monde ou d'un compendium) */
+function getFolder(item) {
+    const { uuid, folderId } = item.dataset;
+    // Les dossiers d'un compendium vivent dans pack.folders, que fromUuidSync ne consulte pas
+    if (uuid?.startsWith("Compendium.")) {
+        const parsed = foundry.utils.parseUuid(uuid);
+        return parsed?.collection?.folders?.get(parsed.id) ?? null;
+    }
+    return game.folders.get(folderId) ?? null;
+}
+
+/** Applique la couleur du texte aux en-têtes de dossiers d'une liste */
+function applyColors(html) {
+    for (const header of html.querySelectorAll("li.folder > .folder-header")) {
+        const color = getTextColor(getFolder(header.parentElement));
+        header.classList.toggle("lqol-folder-text", !!color);
+        if (color) header.style.setProperty("--lqol-folder-text", color);
+        else header.style.removeProperty("--lqol-folder-text");
+    }
+}
+
+export const FolderTextColor = {
+    listen() {
+        Hooks.on("renderFolderConfig", (app, html) => addPicker(app, html));
+        // Toutes les fenêtres qui affichent des dossiers : barre latérale, compendiums…
+        Hooks.on("renderApplicationV2", (_app, html) => {
+            if (html instanceof HTMLElement) applyColors(html);
+        });
+    }
+};

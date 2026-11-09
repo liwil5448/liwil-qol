@@ -7,7 +7,7 @@
       },
       "DarkChat": {
         "Name": "Dark chat",
-        "Hint": "Show the chat with a high-contrast dark theme: black background, border in the player's color, whispers in blue. Unchecked: original style."
+        "Hint": "Show the chat as white on black: a frame in the player's color around their messages, whispers in blue, system decorative backgrounds removed. Unchecked: original style."
       },
       "JoinMusic": {
         "Name": "Join page music",
@@ -28,6 +28,10 @@
       "Volume": "Music volume",
       "Error": "Liwil QoL: could not save the join page music into the world description.",
       "Blocked": "Liwil QoL: Foundry sandboxed the join page player, the music will not be able to play."
+    },
+    "FolderTextColor": {
+      "Name": "Text color",
+      "Hint": "Color of the folder name in lists. Empty: Foundry's original color."
     }
   }
 }

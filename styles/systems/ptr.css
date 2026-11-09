@@ -35,7 +35,7 @@ body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer {
 }
 body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .effect {
     background: var(--lqol-chat-bg-alt);
-    border-color: var(--lqol-chat-border);
+    border-color: var(--lqol-chat-block-border);
     color: var(--lqol-chat-text);
 }
 
@@ -49,7 +49,7 @@ body.liwil-qol-chat-dark .chat-message.message .damage-content {
 body.liwil-qol-chat-dark .chat-message.message .attack-roll .img-row,
 body.liwil-qol-chat-dark .chat-message.message .attack-selector .img-row {
     background: rgba(255, 255, 255, .04);
-    border-color: var(--lqol-chat-border);
+    border-color: var(--lqol-chat-block-border);
     box-shadow: none;
 }
 
@@ -58,13 +58,13 @@ body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .buttons .app
 body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .buttons .contested-check,
 body.liwil-qol-chat-dark .chat-message.message .message-buttons button {
     background: var(--lqol-chat-button);
-    color: var(--lqol-chat-text);
-    border: 1px solid var(--lqol-chat-border);
+    color: var(--lqol-chat-button-text);
+    border: 1px solid var(--lqol-chat-button-border);
 }
 body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .buttons .apply-capture:hover,
 body.liwil-qol-chat-dark .chat-message.message .flavor-text.footer .buttons .contested-check:hover,
 body.liwil-qol-chat-dark .chat-message.message .message-buttons button:hover {
-    background: var(--lqol-chat-button-hover);
+    background: var(--lqol-chat-button);
     color: #fff;
     border-color: #fff;
     box-shadow: 0 0 0 1px #fff;
@@ -72,7 +72,7 @@ body.liwil-qol-chat-dark .chat-message.message .message-buttons button:hover {
 
 /* ---------- Liste des cibles (dégâts) ---------- */
 body.liwil-qol-chat-dark .chat-message.message .mon-list .mon-list-header {
-    border-bottom-color: var(--lqol-chat-border);
+    border-bottom-color: var(--lqol-chat-block-border);
 }
 body.liwil-qol-chat-dark .chat-message.message .mon-list .mon-list-header h4 {
     color: var(--lqol-chat-text);

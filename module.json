@@ -17,7 +17,8 @@
   ],
   "styles": [
     "styles/chat-dark.css",
-    "styles/whisper.css"
+    "styles/whisper.css",
+    "styles/folders.css"
   ],
   "languages": [
     {

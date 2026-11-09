@@ -1,0 +1,11 @@
+/* ============================================================
+   Liwil QoL — couleur du texte des dossiers (folder-text-color.js)
+   ============================================================ */
+
+li.folder > .folder-header.lqol-folder-text {
+    color: var(--lqol-folder-text);
+    text-shadow: none;
+}
+li.folder > .folder-header.lqol-folder-text .create-button {
+    --button-text-color: var(--lqol-folder-text);
+}

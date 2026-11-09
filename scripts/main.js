@@ -5,6 +5,8 @@
 import { MODULE_ID } from "./constants.js";
 import { ChatWhisper } from "./chat-whisper.js";
 import { JoinMusic } from "./join-music.js";
+import { ChatGroups } from "./chat-groups.js";
+import { FolderTextColor } from "./folder-text-color.js";
 
 /** Fichiers CSS propres aux cartes de chat de certains systèmes (styles/systems/<fichier>.css) */
 const SYSTEM_STYLES = {
@@ -44,7 +46,7 @@ function registerSettings() {
         scope: "user",
         config: true,
         type: Boolean,
-        default: true,
+        default: false,
         onChange: applyChatTheme
     });
 
@@ -53,11 +55,13 @@ function registerSettings() {
 
 // Doit exister avant la création de l'éditeur ProseMirror du chat
 ChatWhisper.listen();
+FolderTextColor.listen();
 
 Hooks.once("init", () => {
     registerSettings();
     applyChatTheme(game.settings.get(MODULE_ID, "darkChat"));
     loadSystemStyles();
+    ChatGroups.listen();
 });
 
 Hooks.once("ready", () => {
@@ -66,7 +70,8 @@ Hooks.once("ready", () => {
     JoinMusic.sync();
 });
 
-// Couleur du joueur, utilisée pour le cadre du message par le chat sombre
+// Couleur et identité du joueur, utilisées pour le cadre des messages par le chat sombre
 Hooks.on("renderChatMessageHTML", (message, html) => {
     if (message.author?.color) html.style.setProperty("--lqol-player-color", message.author.color.css);
+    ChatGroups.tag(message, html);
 });
