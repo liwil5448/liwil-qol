@@ -12,7 +12,8 @@ import { Log } from "./log.js";
 /** Fichiers CSS propres aux cartes de chat de certains systèmes (styles/systems/<fichier>.css) */
 const SYSTEM_STYLES = {
     "ptu": "ptr",
-    "liwil-mon": "ptr"
+    "liwil-mon": "ptr",
+    "dnd5e": "dnd5e"
 };
 
 /** Active ou non le thème sombre du chat */

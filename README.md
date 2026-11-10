@@ -21,7 +21,7 @@ Les réglages de portée « joueur » sont accessibles à chaque joueur pour lui
 
 ## Cartes propres à un système
 
-Le CSS générique (`styles/chat-dark.css`) ne touche qu'aux classes de Foundry. Les cartes d'un système s'habillent dans `styles/systems/<fichier>.css`, déclaré dans `SYSTEM_STYLES` de `scripts/main.js`. Actuellement : `ptr.css` pour `ptu` et `liwil-mon`.
+Le CSS générique (`styles/chat-dark.css`) ne touche qu'aux classes de Foundry. Les cartes d'un système s'habillent dans `styles/systems/<fichier>.css`, déclaré dans `SYSTEM_STYLES` de `scripts/main.js`. Actuellement : `ptr.css` pour `ptu` et `liwil-mon`, `dnd5e.css` pour `dnd5e` (cartes de capacité, d'attaque et de dégâts, bloc d'application des dégâts, étiquettes, et quelques textes de midi-qol).
 
 ## Musique de la page de connexion : fonctionnement
 

@@ -1,0 +1,107 @@
+/* ============================================================
+   Liwil QoL — chat sombre, cartes propres à dnd5e (5.x) et midi-qol
+   Chargé par main.js seulement avec ce système (voir SYSTEM_STYLES).
+   Les variables --lqol-chat-* sont définies dans styles/chat-dark.css.
+
+   dnd5e ne prévoit pas de thème sombre pour ses cartes de chat : les messages
+   gardent ses variables du thème clair (fond beige, cadres dorés, texte sombre).
+   Presque toutes ses couleurs passant par des variables, on les redéfinit sur
+   le message, ce qui vaut pour tout son contenu.
+   ============================================================ */
+
+body.liwil-qol-chat-dark .chat-message {
+    /* Fonds : noir partout */
+    --dnd5e-color-card: var(--lqol-chat-bg);
+    --dnd5e-background-card: var(--lqol-chat-bg);
+    --dnd5e-color-parchment: var(--lqol-chat-bg);
+    --dnd5e-background-parchment: var(--lqol-chat-bg);
+    --dnd5e-background-5: var(--lqol-chat-bg);
+    --dnd5e-background-alt-1: var(--lqol-chat-bg);
+    --dnd5e-block-background: var(--lqol-chat-bg);
+    --table-background-color: var(--lqol-chat-bg);
+    --item-summary-background: transparent;
+
+    /* Cadres et séparateurs : blanc (les cadres dorés deviennent des liserés blancs) */
+    --dnd5e-color-gold: var(--lqol-chat-block-border);
+    --dnd5e-border-gold: 1px solid var(--lqol-chat-block-border);
+    --dnd5e-border-separator-faint: 1px solid var(--lqol-chat-block-border);
+    --dnd5e-border-separator-heavy: 1px solid var(--lqol-chat-block-border);
+    --dnd5e-border-dotted: 1px dotted var(--lqol-chat-block-border);
+    --dnd5e-border-dashed: 1px dashed var(--lqol-chat-block-border);
+    --dnd5e-color-tan: var(--lqol-chat-text);
+    --dnd5e-color-faint: #777777;
+
+    /* Textes : blanc */
+    --color-text-primary: var(--lqol-chat-text);
+    --color-text-secondary: var(--lqol-chat-text);
+    --color-text-tertiary: var(--lqol-chat-text);
+    --color-text-emphatic: var(--lqol-chat-text);
+    --color-text-title: var(--lqol-chat-text);
+    --color-text-dark-primary: var(--lqol-chat-text);
+    --color-text-dark-5: var(--lqol-chat-text);
+    --color-text-dark-inactive: #d0cec8;
+
+    /* Étiquettes (Action, Instantané, Allonge…) : blanc sur noir, cadre blanc */
+    --pill-border: 1px solid var(--lqol-chat-block-border);
+    --pill-border-dotted: 1px solid var(--lqol-chat-block-border);
+    --pill-transparent-color: var(--lqol-chat-text);
+    --pill-background-color: var(--lqol-chat-bg);
+    --pill-colored-text-color: var(--lqol-chat-text);
+
+    /* Icône de d20 des jets intégrés au texte : noire par défaut, passée en blanc */
+    --dnd5e-roll-icon-filter: invert(1);
+
+    /* Dégâts calculés, réussites et échecs : couleurs vives lisibles sur le noir */
+    --dnd5e-color-application-damage: var(--lqol-chat-bad);
+    --dnd5e-color-application-healing: var(--lqol-chat-good);
+    --dnd5e-color-application-temp: var(--lqol-chat-info);
+    --dnd5e-color-success: var(--lqol-chat-good);
+    --dnd5e-color-success-critical: var(--lqol-chat-good);
+    --dnd5e-color-success-background: var(--lqol-chat-bg);
+    --dnd5e-color-failure: var(--lqol-chat-bad);
+    --dnd5e-color-failure-critical: var(--lqol-chat-bad);
+    --dnd5e-color-failure-background: var(--lqol-chat-bg);
+}
+
+/* ---------- Carte : en-tête et description ---------- */
+body.liwil-qol-chat-dark .chat-message .chat-card .description,
+body.liwil-qol-chat-dark .chat-message .chat-card .description :is(.summary, .details, .title, .subtitle, p, li) {
+    color: var(--lqol-chat-text);
+}
+body.liwil-qol-chat-dark .chat-message .chat-card .description {
+    background: var(--lqol-chat-bg);
+    border-color: var(--lqol-chat-block-border);
+}
+
+/* ---------- Boutons à bascule : l'état choisi est inversé (noir sur blanc) ---------- */
+/* Onglets Ciblé / Sélectionné, multiplicateurs de dégâts (-1, 0, ¼, ½, 1, 2) */
+body.liwil-qol-chat-dark .chat-message .target-source-control button[aria-pressed="true"],
+body.liwil-qol-chat-dark .chat-message .damage-multipliers button[aria-pressed="true"] {
+    background: var(--lqol-chat-text);
+    color: #000;
+    border-color: var(--lqol-chat-text);
+    text-shadow: none;
+}
+body.liwil-qol-chat-dark .chat-message .damage-multipliers button[aria-pressed="true"]::after {
+    background-color: #000;
+}
+
+/* ---------- Jets : réussite et échec critiques ---------- */
+body.liwil-qol-chat-dark .chat-message .dice-result .dice-total.critical {
+    background: var(--lqol-chat-bg);
+    border-color: var(--lqol-chat-good);
+    color: var(--lqol-chat-good);
+}
+body.liwil-qol-chat-dark .chat-message .dice-result .dice-total.fumble {
+    background: var(--lqol-chat-bg);
+    border-color: var(--lqol-chat-bad);
+    color: var(--lqol-chat-bad);
+}
+
+/* ---------- midi-qol : textes estompés et dégâts écrits en couleurs fixes ---------- */
+body.liwil-qol-chat-dark .chat-message :is(.midi-qol-faint, .midi-qol-very-faint) {
+    color: #d0cec8;
+}
+body.liwil-qol-chat-dark .chat-message :is(.midi-qol-dmg-vitality-total, .midi-qol-dmg-vitality .fa-heart-crack) {
+    color: var(--lqol-chat-text);
+}

@@ -43,6 +43,13 @@ body.liwil-qol-chat-dark .chat-message {
     border-radius: var(--lqol-frame-radius);
     color: var(--lqol-chat-text);
 }
+/* Liens intégrés au texte (jets [[/r …]], liens vers des documents) : blanc sur noir */
+body.liwil-qol-chat-dark .chat-message {
+    --content-link-background: var(--lqol-chat-bg);
+    --content-link-border-color: var(--lqol-chat-block-border);
+    --content-link-text-color: var(--lqol-chat-text);
+    --content-link-icon-color: var(--lqol-chat-text);
+}
 /* Fond décoratif posé par certains systèmes (texture de dnd5e) */
 body.liwil-qol-chat-dark .chat-message::before {
     content: none;
