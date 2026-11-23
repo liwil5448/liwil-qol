@@ -4,6 +4,8 @@
  * Un clic sur la barre ouvre la liste des joueurs. Clic sur un nom : chuchoter à cette personne et refermer
  * la liste. Maj + clic : ajouter ou retirer une personne, liste ouverte.
  * Le mode reste actif après l'envoi, même en message public (« Personne »), pour rechuchoter facilement.
+ * En mode chuchotement, les destinataires sont conservés d'un message à l'autre : après l'envoi, la commande
+ * /w est remise en tête de la saisie vidée par Foundry, pour une discussion privée sans interruption.
  * Désactiver la bulle retire la commande /w et cache la barre.
  * Liste sur mesure, car un <select> natif se referme à chaque choix.
  * Le début du message contient la commande /w, qui reste la seule référence des destinataires.
@@ -19,13 +21,47 @@ let editorView = null;
 /** Mode chuchotement : la barre des destinataires reste affichée, même en message public */
 let whisperMode = false;
 
+/** Destinataires du message en cours d'envoi, à remettre dans la saisie une fois vidée */
+let pendingRecipients = null;
+let pendingTimer = null;
+
+/** Saisie mise à jour : liste alignée, et commande /w remise après un envoi */
+function onEditorUpdate(view) {
+    syncDropdown();
+    if (!pendingRecipients || view.state.doc.textContent.trim()) return;
+    const names = pendingRecipients;
+    pendingRecipients = null;
+    clearTimeout(pendingTimer);
+    // Hors de la mise à jour en cours de l'éditeur : une transaction imbriquée serait refusée
+    setTimeout(() => {
+        if (whisperMode && !getRecipients().length) applyRecipients(names);
+    });
+}
+
+/** Envoi d'un message : retenir ses destinataires si le mode chuchotement est actif */
+function onChatMessage(_chatLog, message) {
+    if (!whisperMode) return;
+    const names = parseRecipients(String(message).replace(/<[^>]*>/g, "").trim());
+    if (!names.length) return;
+    pendingRecipients = names;
+    Log.debug("Chuchotement : destinataires conservés pour le prochain message", names);
+    // Envoi refusé ou interrompu : ne rien remettre plus tard par surprise
+    clearTimeout(pendingTimer);
+    pendingTimer = setTimeout(() => pendingRecipients = null, 3000);
+}
+
 function getDropdown() {
     return document.querySelector(".liwil-qol-whisper");
 }
 
 /** Destinataires indiqués par la commande présente dans le message */
 function getRecipients() {
-    const match = editorView?.state.doc.firstChild?.textContent.match(WHISPER_PREFIX);
+    return parseRecipients(editorView?.state.doc.firstChild?.textContent ?? "");
+}
+
+/** Destinataires d'une commande /w en début de texte */
+function parseRecipients(text) {
+    const match = text.match(WHISPER_PREFIX);
     if (!match) return [];
     return match[1].replace(/[[\]]/g, "").split(",").map(name => name.trim()).filter(Boolean);
 }
@@ -90,6 +126,8 @@ function createOption(label, name = "", color = null, offline = false) {
             applyRecipients(recipients.includes(name) ? recipients.filter(r => r !== name) : [...recipients, name]);
             return;
         }
+        // Choisir quelqu'un dans la liste active le mode chuchotement (destinataires conservés)
+        if (name) whisperMode = true;
         applyRecipients(name ? [name] : []);
         setMenuOpen(false);
     });
@@ -175,7 +213,7 @@ export const ChatWhisper = {
                     editorView = view;
                     Log.debug("Chuchotement : éditeur du chat trouvé");
                     return {
-                        update: syncDropdown,
+                        update: onEditorUpdate,
                         destroy() {
                             if (editorView === view) editorView = null;
                             Log.debug("Chuchotement : éditeur du chat fermé");
@@ -195,5 +233,6 @@ export const ChatWhisper = {
 
         Hooks.on("renderChatInput", (_app, elements) => addControls(elements["#chat-controls"], elements["#message-modes"]));
         Hooks.on("userConnected", refreshOptions);
+        Hooks.on("chatMessage", onChatMessage);
     }
 };
