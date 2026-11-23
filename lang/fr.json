@@ -9,9 +9,14 @@
         "Name": "Chat sombre",
         "Hint": "Affiche le chat en blanc sur fond noir : cadre à la couleur du joueur autour de ses messages, chuchotements en bleu, fonds décoratifs du système retirés. Décoché : style d'origine."
       },
+      "JoinMusicPlaylist": {
+        "Name": "Playlist de la page de connexion",
+        "Hint": "Playlist de Foundry jouée en boucle sur la page de connexion, dans son ordre (ou mélangée si elle est en mode aléatoire), avec le volume de chaque piste. Fichiers locaux et vidéos YouTube du module Jokerbox. Les modifications de la playlist sont reprises automatiquement. Prioritaire sur le fichier ci-dessous.",
+        "None": "Aucune (utiliser le fichier ci-dessous)"
+      },
       "JoinMusic": {
         "Name": "Musique de la page de connexion",
-        "Hint": "Musique jouée en boucle sur la page de connexion des joueurs. Elle démarre seule dans l'application Foundry ; dans un navigateur, il faut cliquer sur le haut-parleur en bas à gauche. Le module l'inscrit dans la description du monde : videz ce champ avant de désactiver le module. Sans effet avec le thème de connexion « minimal »."
+        "Hint": "Fichier joué en boucle sur la page de connexion si aucune playlist n'est choisie. Le module inscrit la musique dans la description du monde : videz la playlist et ce champ avant de désactiver le module. Dans un navigateur, il faut cliquer sur le haut-parleur en bas à gauche. Sans effet avec le thème de connexion « minimal »."
       },
       "JoinMusicVolume": {
         "Name": "Volume de la musique de connexion",

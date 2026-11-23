@@ -59,6 +59,7 @@ function registerSettings() {
 // Doit exister avant la création de l'éditeur ProseMirror du chat
 ChatWhisper.listen();
 FolderTextColor.listen();
+JoinMusic.listen();
 
 Hooks.once("init", () => {
     registerSettings();

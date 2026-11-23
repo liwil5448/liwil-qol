@@ -8,7 +8,8 @@ Module Foundry VTT (V14) de confort de jeu, indépendant du système.
 |---|---|---|
 | Barre latérale ouverte au démarrage | joueur | Ouvre ou replie la barre latérale de droite au chargement de la partie. |
 | Chat sombre | joueur | Désactivé par défaut. Blanc sur fond noir : cadre à la couleur du joueur, chuchotements en bleu `#0038F5`, pas d'italique, fonds décoratifs du système retirés. |
-| Musique de la page de connexion | monde (MJ) | Musique en boucle sur la page `/join`, avec un haut-parleur pour couper le son et régler le volume. |
+| Playlist de la page de connexion | monde (MJ) | Playlist de Foundry jouée en boucle sur la page `/join` : fichiers locaux et vidéos YouTube du module Jokerbox. Prioritaire sur le fichier. |
+| Musique de la page de connexion | monde (MJ) | Fichier joué en boucle sur la page `/join` si aucune playlist n'est choisie. |
 | Volume de la musique de connexion | monde (MJ) | Volume de départ de cette musique. |
 
 Les réglages de portée « joueur » sont accessibles à chaque joueur pour lui-même. Ceux de portée « monde » ne sont visibles que des utilisateurs qui ont le droit de modifier la configuration : par défaut, le MJ et le MJ assistant.
@@ -32,7 +33,9 @@ Foundry ne charge aucun script de module sur `/join`. La seule chose de la parti
 - **Navigateur** : les navigateurs bloquent le son tant qu'on n'a pas cliqué. Le haut-parleur reste barré : un clic dessus lance la musique. Un clic ailleurs sur la page ne suffit pas, car l'iframe isolée ne le voit pas.
 - Un clic sur le haut-parleur coupe ou rétablit le son. Le survol (ou la touche Tab, ou un appui long sur écran tactile) affiche le curseur de volume à sa droite. Il se referme quand la souris s'en va, ou au plus tard après 4 secondes sans mouvement.
 - L'iframe isolée n'a pas accès au stockage du navigateur : volume et son coupé ne sont pas mémorisés d'une visite à l'autre. Chaque visite repart du volume choisi par le MJ.
-- **Avant de désactiver le module, videz le réglage** : le fragment est retiré de la description. Sinon, la musique continue de jouer.
+- **Playlist** : les pistes sont jouées dans l'ordre de la playlist (mélangées si elle est en mode aléatoire), en boucle, chacune à son volume multiplié par le volume général. Les modifications de la playlist (pistes ajoutées, retirées, volume) sont reprises automatiquement par le MJ actif.
+- **Vidéos YouTube (Jokerbox)** : YouTube refuse de jouer dans l'iframe isolée, mais `youtube.com` fait partie des domaines de confiance de Foundry. Le fragment contient donc aussi une iframe YouTube invisible, que le lecteur pilote par messages (chargement, lecture, volume, coupure, fin de piste). Dans l'application Foundry, tout démarre seul. Dans un navigateur, YouTube refuse de démarrer sans clic dans son propre lecteur : les vidéos sont alors sautées et seuls les fichiers locaux de la playlist sont joués.
+- **Avant de désactiver le module, videz les réglages de playlist et de fichier** : le fragment est retiré de la description. Sinon, le fragment reste dans la description et la musique continue de jouer.
 - Sans effet avec le thème de connexion « minimal », qui n'affiche pas la description.
 
 ## Dépannage
